@@ -1,0 +1,7 @@
+# we can have gradle generate this file
+name: BoosterPlugin
+version: 1.0 # TODO version from gradle
+main: com.alttd.boosters.BoosterPlugin
+api-version: 1.17
+load: STARTUP
+authors: [Destro, Teriuihi]

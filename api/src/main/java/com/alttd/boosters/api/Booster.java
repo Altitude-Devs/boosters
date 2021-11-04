@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public interface Booster {
 
-    boolean active();
+    boolean isActive();
 
     void setActive(Boolean active);
 
@@ -33,4 +33,6 @@ public interface Booster {
     UUID getUUID();
 
     void stopBooster();
+
+    void saveBooster();
 }

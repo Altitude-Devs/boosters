@@ -6,6 +6,7 @@ include(":velocity")
 dependencyResolutionManagement {
     repositories {
         mavenCentral()
+        mavenLocal()
         // Altitude - Galaxy
         maven {
             name = "maven"

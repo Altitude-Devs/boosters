@@ -1,6 +1,5 @@
-package com.alttd.boosters.listeners;
+package com.alttd.vboosters.listeners;
 
-import com.alttd.boosters.VelocityBoosters;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import com.velocitypowered.api.event.Subscribe;

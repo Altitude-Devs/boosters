@@ -1,5 +1,6 @@
 plugins {
     `java-library`
+    `maven-publish`
     id("com.github.johnrengelman.shadow") version "7.0.0"
 }
 
@@ -12,6 +13,7 @@ allprojects {
 
 subprojects {
     apply<JavaLibraryPlugin>()
+    apply(plugin = "maven-publish")
 
     java {
         toolchain {
@@ -26,6 +28,25 @@ subprojects {
 
         withType<Javadoc> {
             options.encoding = Charsets.UTF_8.name()
+        }
+    }
+
+    publishing {
+        publications {
+            create<MavenPublication>("mavenJava") {
+                from(components["java"])
+            }
+        }
+
+        configure<PublishingExtension> {
+            repositories {
+                maven {
+                    name = "nexus"
+                    url = uri("http://$name:8081/snapshots")
+                    isAllowInsecureProtocol = true
+                    credentials(PasswordCredentials::class)
+                }
+            }
         }
     }
 }

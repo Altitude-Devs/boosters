@@ -1,6 +1,9 @@
-package com.alttd.boosters;
+package com.alttd.vboosters;
 
-import com.alttd.boosters.listeners.PluginMessageListener;
+import com.alttd.proxydiscordlink.DiscordLink;
+import com.alttd.proxydiscordlink.bot.api.DiscordSendMessage;
+import com.alttd.vboosters.commands.BoosterCommand;
+import com.alttd.vboosters.listeners.PluginMessageListener;
 import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
@@ -15,7 +18,7 @@ import org.slf4j.Logger;
 @Plugin(id = "boosterplugin", name = "BoosterPlugin", version = "1.0.0",
         description = "Easily manage all boosters on the Altitude Minecraft Server Network.",
         authors = {"destro174", "teri"},
-        dependencies = {@Dependency(id = "luckperms")}
+        dependencies = {@Dependency(id = "luckperms"),@Dependency(id = "proxydiscordlink")}
 )
 public class VelocityBoosters {
 
@@ -54,6 +57,7 @@ public class VelocityBoosters {
 
     public void loadCommands() {
         // all (proxy)commands go here
+        new BoosterCommand(server);
     }
 
     public ChannelIdentifier getChannelIdentifier() {

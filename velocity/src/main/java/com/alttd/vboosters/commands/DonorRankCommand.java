@@ -14,6 +14,9 @@ public class DonorRankCommand {
                 .<CommandSource>literal("donorrank")
                 .requires(ctx -> ctx.hasPermission("command.proxy.donorrank"))
                 .executes(context -> {
+                    //EX: donorrank {username} promote archduke {transaction}
+                    //File: {transaction}, cbccaa76-906d-458e-a24e-4b74322f2bb7, none -> archduke
+                    //EX: donorrank {username} demote archduke {transaction}
                     //TODO command format: /donorrank user promote rank donate_id
                     //TODO store the command and before and after rank in a file
                     //TODO remove old donor ranks and add the new one

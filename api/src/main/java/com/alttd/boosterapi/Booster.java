@@ -1,4 +1,4 @@
-package com.alttd.boosters.api;
+package com.alttd.boosterapi;
 
 import java.util.UUID;
 
@@ -35,4 +35,8 @@ public interface Booster {
     void stopBooster();
 
     void saveBooster();
+
+    void finish();
+
+    boolean finished();
 }

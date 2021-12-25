@@ -1,4 +1,4 @@
-package com.alttd.boosters.api;
+package com.alttd.boosterapi;
 
 public enum BoosterType {
 
@@ -6,6 +6,7 @@ public enum BoosterType {
      * MCMMO - implies all mcmmo skills are boosted
      */
     MCMMO("mcmmo"),
+    // TODO : add individual mcmmo skills
     /**
      * MYPET - Boosts MyPet exp gains
      */

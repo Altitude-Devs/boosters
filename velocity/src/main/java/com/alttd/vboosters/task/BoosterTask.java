@@ -1,7 +1,7 @@
 package com.alttd.vboosters.task;
 
+import com.alttd.boosterapi.config.Config;
 import com.alttd.vboosters.VelocityBoosters;
-import com.alttd.vboosters.config.Config;
 
 import java.util.concurrent.TimeUnit;
 
@@ -17,7 +17,7 @@ public class BoosterTask {
     public void init() {
         plugin.getProxy().getScheduler().buildTask(plugin, () -> {
 
-        }).repeat(Config.TaskCheckFrequency, TimeUnit.SECONDS).schedule();
+        }).repeat(Config.taskCheckFrequency, TimeUnit.SECONDS).schedule();
     }
 
 }

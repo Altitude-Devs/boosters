@@ -1,10 +1,11 @@
 package com.alttd.vboosters.data;
 
-import com.alttd.boosters.api.BoosterType;
+import com.alttd.boosterapi.Booster;
+import com.alttd.boosterapi.BoosterType;
 
 import java.util.UUID;
 
-public class VelocityBooster implements com.alttd.boosters.api.Booster{
+public class VelocityBooster implements Booster {
 
     private UUID uuid;
     private String activator;
@@ -29,7 +30,6 @@ public class VelocityBooster implements com.alttd.boosters.api.Booster{
     public VelocityBooster(BoosterType type, String playerName, long duration, int multiplier) {
         this(UUID.randomUUID(), type, playerName, duration, multiplier);
     }
-
 
     @Override
     public boolean isActive() {
@@ -106,12 +106,24 @@ public class VelocityBooster implements com.alttd.boosters.api.Booster{
 
     @Override
     public void stopBooster() {
-
+        setDuration(getTimeRemaining());
+        setActive(false);
+        saveBooster();
     }
 
     @Override
     public void saveBooster() {
+        // logic to save to yaml or to db
+    }
 
+    public void finish() {
+        finished = true;
+        stopBooster();
+    }
+
+    @Override
+    public boolean finished() {
+        return finished;
     }
 
 }

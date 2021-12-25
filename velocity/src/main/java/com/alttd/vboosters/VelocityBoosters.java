@@ -1,12 +1,17 @@
 package com.alttd.vboosters;
 
+import com.alttd.boosterapi.BoosterAPI;
+import com.alttd.boosterapi.BoosterImplementation;
+import com.alttd.boosterapi.util.ALogger;
 import com.alttd.proxydiscordlink.DiscordLink;
 import com.alttd.proxydiscordlink.bot.api.DiscordSendMessage;
 import com.alttd.vboosters.commands.BoosterCommand;
 import com.alttd.vboosters.listeners.PluginMessageListener;
+import com.alttd.vboosters.managers.BoosterManager;
 import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -26,6 +31,9 @@ public class VelocityBoosters {
     private final ProxyServer server;
     private final Logger logger;
 
+    private BoosterAPI boosterAPI;
+    private BoosterManager boosterManager;
+
     private ChannelIdentifier channelIdentifier = MinecraftChannelIdentifier.from("altitude:boosterplugin");
 
     @Inject
@@ -37,10 +45,23 @@ public class VelocityBoosters {
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
+        ALogger.init(logger);
+        boosterAPI = new BoosterImplementation();
+        boosterManager = new BoosterManager(this);
+
         server.getChannelRegistrar().register(channelIdentifier);
         server.getEventManager().register(this, new PluginMessageListener(channelIdentifier));
 
         loadCommands();
+    }
+
+    @Subscribe
+    public void onShutdown(ProxyShutdownEvent event) {
+        boosterManager.saveAllBoosters();
+    }
+
+    public void reloadConfig() {
+        boosterAPI.reloadConfig();
     }
 
     public static VelocityBoosters getPlugin() {
@@ -62,6 +83,10 @@ public class VelocityBoosters {
 
     public ChannelIdentifier getChannelIdentifier() {
         return channelIdentifier;
+    }
+
+    public BoosterManager getBoosterManager() {
+        return boosterManager;
     }
 
 }

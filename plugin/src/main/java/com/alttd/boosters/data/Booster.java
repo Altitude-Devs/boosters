@@ -1,10 +1,10 @@
 package com.alttd.boosters.data;
 
-import com.alttd.boosters.api.BoosterType;
+import com.alttd.boosterapi.BoosterType;
 
 import java.util.UUID;
 
-public class Booster implements com.alttd.boosters.api.Booster {
+public class Booster implements com.alttd.boosterapi.Booster {
 
     private UUID uuid;
     private String activator;
@@ -29,7 +29,6 @@ public class Booster implements com.alttd.boosters.api.Booster {
     public Booster(BoosterType type, String playerName, long duration, int multiplier) {
         this(UUID.randomUUID(), type, playerName, duration, multiplier);
     }
-
 
     @Override
     public boolean isActive() {
@@ -113,5 +112,17 @@ public class Booster implements com.alttd.boosters.api.Booster {
     public void saveBooster() {
 
     }
+
+    @Override
+    public void finish() {
+
+    }
+
+    @Override
+    public boolean finished() {
+        return false;
+    }
+
+
 
 }

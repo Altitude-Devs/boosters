@@ -1,20 +1,19 @@
-package com.alttd.vboosters.config;
+package com.alttd.boosterapi.config;
 
-import com.google.common.base.Throwables;
-import com.google.common.reflect.TypeToken;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.ConfigurationOptions;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
-import org.yaml.snakeyaml.DumperOptions;
+import com.alttd.boosterapi.util.ALogger;
+import io.leangen.geantyref.TypeToken;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationOptions;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.yaml.NodeStyle;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public final class Config {
@@ -23,7 +22,7 @@ public final class Config {
 
     private static File CONFIG_FILE;
     public static ConfigurationNode config;
-    public static YAMLConfigurationLoader configLoader;
+    public static YamlConfigurationLoader configLoader;
 
     static int version;
     static boolean verbose;
@@ -32,9 +31,9 @@ public final class Config {
     public static void init() {
         CONFIGPATH = new File(System.getProperty("user.home") + File.separator + "share" + File.separator + "configs" + File.separator + "Boosters");
         CONFIG_FILE = new File(CONFIGPATH, "config.yml");
-        configLoader = YAMLConfigurationLoader.builder()
-                .setFile(CONFIG_FILE)
-                .setFlowStyle(DumperOptions.FlowStyle.BLOCK)
+        configLoader = YamlConfigurationLoader.builder()
+                .file(CONFIG_FILE)
+                .nodeStyle(NodeStyle.BLOCK)
                 .build();
         if (!CONFIG_FILE.getParentFile().exists()) {
             if(!CONFIG_FILE.getParentFile().mkdirs()) {
@@ -52,7 +51,7 @@ public final class Config {
         }
 
         try {
-            config = configLoader.load(ConfigurationOptions.defaults().setHeader(HEADER));
+            config = configLoader.load(ConfigurationOptions.defaults().header(HEADER));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -76,23 +75,19 @@ public final class Config {
                         method.setAccessible(true);
                         method.invoke(instance);
                     } catch (InvocationTargetException | IllegalAccessException ex) {
-                        throw Throwables.propagate(ex.getCause());
+                        ALogger.fatal("Error reading config", ex);
                     }
                 }
             }
         }
-        try {
-            configLoader.save(config);
-        } catch (IOException ex) {
-            throw Throwables.propagate(ex.getCause());
-        }
+        saveConfig();
     }
 
     public static void saveConfig() {
         try {
             configLoader.save(config);
         } catch (IOException ex) {
-            throw Throwables.propagate(ex.getCause());
+            ALogger.fatal("Error saving config", ex);
         }
     }
 
@@ -101,66 +96,85 @@ public final class Config {
     }
 
     private static void set(String path, Object def) {
-        if(config.getNode(splitPath(path)).isVirtual())
-            config.getNode(splitPath(path)).setValue(def);
+        if(config.node(splitPath(path)).virtual()) {
+            try {
+                config.node(splitPath(path)).set(def);
+            } catch (SerializationException e) {
+            }
+        }
     }
 
     private static void setString(String path, String def) {
         try {
-            if(config.getNode(splitPath(path)).isVirtual())
-                config.getNode(splitPath(path)).setValue(TypeToken.of(String.class), def);
-        } catch(ObjectMappingException ex) {
+            if(config.node(splitPath(path)).virtual())
+                config.node(splitPath(path)).set(TypeToken.get(String.class), def);
+        } catch(SerializationException ex) {
         }
     }
 
     private static boolean getBoolean(String path, boolean def) {
         set(path, def);
-        return config.getNode(splitPath(path)).getBoolean(def);
+        return config.node(splitPath(path)).getBoolean(def);
     }
 
     private static double getDouble(String path, double def) {
         set(path, def);
-        return config.getNode(splitPath(path)).getDouble(def);
+        return config.node(splitPath(path)).getDouble(def);
     }
 
     private static int getInt(String path, int def) {
         set(path, def);
-        return config.getNode(splitPath(path)).getInt(def);
+        return config.node(splitPath(path)).getInt(def);
     }
 
     private static String getString(String path, String def) {
         setString(path, def);
-        return config.getNode(splitPath(path)).getString(def);
+        return config.node(splitPath(path)).getString(def);
     }
 
     private static Long getLong(String path, Long def) {
         set(path, def);
-        return config.getNode(splitPath(path)).getLong(def);
+        return config.node(splitPath(path)).getLong(def);
     }
 
     private static <T> List<String> getList(String path, T def) {
         try {
             set(path, def);
-            return config.getNode(splitPath(path)).getList(TypeToken.of(String.class));
-        } catch(ObjectMappingException ex) {
+            return config.node(splitPath(path)).getList(TypeToken.get(String.class));
+        } catch(SerializationException ex) {
         }
         return new ArrayList<>();
     }
 
-    private static ConfigurationNode getNode(String path) {
-        if(config.getNode(splitPath(path)).isVirtual()) {
-            //new RegexConfig("Dummy");
-        }
-        config.getChildrenMap();
-        return config.getNode(splitPath(path));
+    /** ONLY EDIT ANYTHING BELOW THIS LINE **/
+    public static String driver = "com.mysql.cj.jdbc.Driver";
+    public static String host = "13.11.1.78";
+    public static String port = "3306";
+    public static String database = "McTestSql";
+    public static String user = "root";
+    public static String password = "foobar";
+    public static String options = "?MaxPooledStatements=250&useSSL=false&autoReconnect=true&maxReconnects=3";
+    private static void databaseSettings() {
+        String path = "database.";
+        driver = getString(path + "driver", driver);
+        host = getString(path + "host", host);
+        port = getString(path + "port", port);
+        database = getString(path + "database", database);
+        user = getString(path + "user", user);
+        password = getString(path + "password", password);
+        options = getString(path + "options", options);
     }
 
-    /** ONLY EDIT ANYTHING BELOW THIS LINE **/
-    public static Long queueTaskCheckFrequency = 1L;
     public static Long activeTaskCheckFrequency = 1L;
-    private static void BoosterTaskSettings() {
-        queueTaskCheckFrequency = getLong("task.queue-frequency", queueTaskCheckFrequency);
+    public static Long taskCheckFrequency = 1L;
+    private static void boosterTaskSettings() {
         activeTaskCheckFrequency = getLong("task.queue-frequency", activeTaskCheckFrequency);
+        taskCheckFrequency = getLong("task.check-frequency", taskCheckFrequency);
+    }
+
+    public static String pluginMessageChannel = "altitude:boosterplugin";
+    private static void pluginMessageSettings() {
+        pluginMessageChannel = getString("settings.message-channel", pluginMessageChannel);
     }
 
 }

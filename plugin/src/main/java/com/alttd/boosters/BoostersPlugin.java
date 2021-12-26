@@ -23,12 +23,15 @@ public final class BoostersPlugin extends JavaPlugin {
         instance = this;
         boosterAPI = new BoosterImplementation();
         boosterManager = new BoosterManager();
+
         if (getServer().getPluginManager().isPluginEnabled("MyPet")) {
             registerListener(new MyPetListener());
         }
+
         if (getServer().getPluginManager().isPluginEnabled("mcMMO")) {
             registerListener(new MCmmoListener());
         }
+
         registerListener(new PhantomSpawnListener());
 
         getServer().getMessenger().registerOutgoingPluginChannel(this, Config.pluginMessageChannel);

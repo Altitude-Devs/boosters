@@ -30,7 +30,6 @@ public class Booster implements com.alttd.boosterapi.Booster {
         this(UUID.randomUUID(), type, playerName, duration, multiplier);
     }
 
-
     @Override
     public boolean isActive() {
         return active;

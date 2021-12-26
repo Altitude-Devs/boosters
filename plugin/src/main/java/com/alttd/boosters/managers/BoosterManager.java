@@ -18,7 +18,7 @@ public class BoosterManager {
         return false;
     }
 
-    public Booster getBoosted(BoosterType type) {
+    public Booster getBooster(BoosterType type) {
         for (Booster b : activeBoosters) {
             if (b.getType() == type && b.isActive()) {
                 return b;

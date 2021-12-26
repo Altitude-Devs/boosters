@@ -1,6 +1,7 @@
 plugins {
     `maven-publish`
     id("com.github.johnrengelman.shadow")
+    id("net.minecrell.plugin-yml.bukkit")
 }
 
 dependencies {
@@ -27,4 +28,12 @@ tasks {
         dependsOn(shadowJar)
     }
 
+}
+
+bukkit {
+    name = rootProject.name
+    main = "$group.BoostersPlugin"
+    apiVersion = "1.18"
+    authors = listOf("destro174")
+    softDepend = listOf("MyPet", "mcMMO")
 }

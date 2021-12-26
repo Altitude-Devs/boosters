@@ -13,10 +13,19 @@ public class MCmmoListener implements Listener {
     @EventHandler
     public void onMcMMOExperienceEvent(McMMOPlayerXpGainEvent event) {
         BoosterManager bm = BoostersPlugin.getInstance().getBoosterManager();
-        if(bm.isBoosted(BoosterType.MCMMO)) {
-            Booster b = bm.getBoosted(BoosterType.MCMMO);
+        if (bm.isBoosted(BoosterType.MCMMO)) {
+            Booster b = bm.getBooster(BoosterType.MCMMO);
             int multiplier = b.getMultiplier();
             event.setRawXpGained(event.getRawXpGained() * multiplier);
+            return;
+        }
+        String skillName = event.getSkill().name();
+        BoosterType type = BoosterType.getByName(skillName);
+        if (bm.isBoosted(type)) {
+            Booster b = bm.getBooster(type);
+            int multiplier = b.getMultiplier();
+            event.setRawXpGained(event.getRawXpGained() * multiplier);
+            return;
         }
     }
     // TODO : add individual mcmmo skill boosters

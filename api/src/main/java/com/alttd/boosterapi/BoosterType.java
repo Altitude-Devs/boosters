@@ -6,7 +6,23 @@ public enum BoosterType {
      * MCMMO - implies all mcmmo skills are boosted
      */
     MCMMO("mcmmo"),
-    // TODO : add individual mcmmo skills
+
+    ACROBATICS("acrobatics"),
+    ALCHEMY("alchemy"),
+    ARCHERY("archery"),
+    AXES("axes"),
+    EXCAVATION("excavation"),
+    FISHING("fishing"),
+    HERBALISM("herbalism"),
+    MINING("mining"),
+    REPAIR("repair"),
+    SALVAGE("salvage"),
+    SMELTING("smelting"),
+    SWORDS("swords"),
+    TAMING("taming"),
+    UNARMED("unarmed"),
+    WOODCUTTING("woodcutting"),
+
     /**
      * MYPET - Boosts MyPet exp gains
      */
@@ -33,7 +49,7 @@ public enum BoosterType {
      */
     UNKNOWN("unknown");
 
-    public String BoosterName;
+    public final String BoosterName;
     BoosterType(String BoosterName) {
         this.BoosterName = BoosterName;
     }

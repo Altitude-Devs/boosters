@@ -1,11 +1,21 @@
 package com.alttd.vboosters.commands;
 
+import com.alttd.boosterapi.BoosterAPI;
+import com.alttd.boosterapi.config.Config;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ProxyServer;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.model.user.User;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeType;
+import net.luckperms.api.node.types.InheritanceNode;
+
+import java.util.UUID;
 
 public class DonorRankCommand {
 
@@ -21,6 +31,21 @@ public class DonorRankCommand {
                     //TODO store the command and before and after rank in a file
                     //TODO remove old donor ranks and add the new one
 
+                    if (!Config.donorRanks.contains(context.getInput())) //TODO validate group from command is donor
+                        return 0;
+                    LuckPerms luckPerms = BoosterAPI.get().getLuckPerms();
+                    User user = luckPerms.getUserManager().getUser(UUID.fromString(context.getInput())); //TODO context.getInput needs to get uuid
+                    if (user == null) {
+                        context.getSource().sendMessage(MiniMessage.get().parse("string")); //TODO configurable message
+                        return 0;
+                    }
+                    user.getNodes(NodeType.INHERITANCE).stream()
+                            .filter(Node::getValue)
+                            .forEach(node -> {
+                                if (Config.donorRanks.contains(node.getKey()))
+                                    user.data().remove(node);
+                            });
+                    user.data().add(InheritanceNode.builder(context.getInput()).build()); //TODO this needs to add the group from the command
                     //TODO command format: /donorrank user promote rank donate_id
                     //TODO get command and before and after rank from a file
                     //TODO remove the command and before and after rank from a file

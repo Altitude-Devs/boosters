@@ -177,4 +177,8 @@ public final class Config {
         pluginMessageChannel = getString("settings.message-channel", pluginMessageChannel);
     }
 
+    public static List<String> donorRanks = new ArrayList<>();
+    private static void loadDonorStuff() {
+        donorRanks = getList("donor.ranks", donorRanks);
+    }
 }

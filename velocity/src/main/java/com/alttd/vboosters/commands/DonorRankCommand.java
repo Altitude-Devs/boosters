@@ -2,7 +2,9 @@ package com.alttd.vboosters.commands;
 
 import com.alttd.boosterapi.BoosterAPI;
 import com.alttd.boosterapi.config.Config;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandMeta;
@@ -23,6 +25,10 @@ public class DonorRankCommand {
         LiteralCommandNode<CommandSource> command = LiteralArgumentBuilder
                 .<CommandSource>literal("donorrank")
                 .requires(ctx -> ctx.hasPermission("command.proxy.donorrank"))
+                .then(RequiredArgumentBuilder.argument("username", StringArgumentType.word()))
+                .then(RequiredArgumentBuilder.argument("action", StringArgumentType.word()))
+                .then(RequiredArgumentBuilder.argument("rank", StringArgumentType.word()))
+                .then(RequiredArgumentBuilder.argument("transaction-id", StringArgumentType.word()))
                 .executes(context -> {
                     //EX: donorrank {username} promote archduke {transaction}
                     //File: {transaction}, cbccaa76-906d-458e-a24e-4b74322f2bb7, none -> archduke

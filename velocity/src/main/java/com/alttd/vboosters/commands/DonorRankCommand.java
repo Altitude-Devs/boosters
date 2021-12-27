@@ -2,6 +2,8 @@ package com.alttd.vboosters.commands;
 
 import com.alttd.boosterapi.BoosterAPI;
 import com.alttd.boosterapi.config.Config;
+import com.alttd.boosterapi.util.Utils;
+import com.alttd.vboosters.VelocityBoosters;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
@@ -11,52 +13,53 @@ import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.Template;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.InheritanceNode;
 
-import java.util.UUID;
-
 public class DonorRankCommand {
 
+    private final MiniMessage miniMessage;
+
     public DonorRankCommand(ProxyServer proxyServer) {
+        miniMessage = MiniMessage.get();
         LiteralCommandNode<CommandSource> command = LiteralArgumentBuilder
                 .<CommandSource>literal("donorrank")
                 .requires(ctx -> ctx.hasPermission("command.proxy.donorrank"))
                 .then(RequiredArgumentBuilder.argument("username", StringArgumentType.word()))
                 .then(RequiredArgumentBuilder.argument("action", StringArgumentType.word()))
                 .then(RequiredArgumentBuilder.argument("rank", StringArgumentType.word()))
-                .then(RequiredArgumentBuilder.argument("transaction-id", StringArgumentType.word()))
                 .executes(context -> {
-                    //EX: donorrank {username} promote archduke {transaction}
-                    //File: {transaction}, cbccaa76-906d-458e-a24e-4b74322f2bb7, none -> archduke
-                    //EX: donorrank {username} demote archduke {transaction}
-                    //TODO command format: /donorrank user promote rank donate_id
-                    //TODO store the command and before and after rank in a file
-                    //TODO remove old donor ranks and add the new one
 
-                    if (!Config.donorRanks.contains(context.getInput())) //TODO validate group from command is donor
-                        return 0;
+                    String username = context.getArgument("username", String.class);
+                    String action = context.getArgument("context", String.class);
+                    String rank = context.getArgument("rank", String.class);
+
                     LuckPerms luckPerms = BoosterAPI.get().getLuckPerms();
-                    User user = luckPerms.getUserManager().getUser(UUID.fromString(context.getInput())); //TODO context.getInput needs to get uuid
+                    User user = luckPerms.getUserManager().getUser(username); //TODO test if this works with username
+
                     if (user == null) {
-                        context.getSource().sendMessage(MiniMessage.get().parse("string")); //TODO configurable message
-                        return 0;
+                        context.getSource().sendMessage(miniMessage.parse(
+                                Config.INVALID_USER,
+                                Template.of("player", username)));
+                        return 1;
                     }
-                    user.getNodes(NodeType.INHERITANCE).stream()
-                            .filter(Node::getValue)
-                            .forEach(node -> {
-                                if (Config.donorRanks.contains(node.getKey()))
-                                    user.data().remove(node);
-                            });
-                    user.data().add(InheritanceNode.builder(context.getInput()).build()); //TODO this needs to add the group from the command
-                    //TODO command format: /donorrank user promote rank donate_id
-                    //TODO get command and before and after rank from a file
-                    //TODO remove the command and before and after rank from a file
-                    //TODO remove current donor ranks and add the old one back (or remove them all if there was no old one)
-//                    VelocityBoosters.getPlugin().getLogger().info(stuff);
+
+                    if (!Config.donorRanks.contains(context.getInput())) {
+                        context.getSource().sendMessage(miniMessage.parse(
+                                Config.INVALID_DONOR_RANK,
+                                Template.of("rank", rank)));
+                        return 1;
+                    }
+
+                    switch (action) {
+                        case "promote" -> promote(user, rank);
+                        case "demote" -> demote(user, rank);
+                        default -> context.getSource().sendMessage(miniMessage.parse(Config.INVALID_ACTION));
+                    }
                     return 1;
                 })
                 .build();
@@ -68,5 +71,38 @@ public class DonorRankCommand {
         CommandMeta meta = metaBuilder.build();
 
         proxyServer.getCommandManager().register(meta, brigadierCommand);
+    }
+
+    private void promote(User user, String rank) {
+        user.getNodes(NodeType.INHERITANCE).stream()
+                .filter(Node::getValue)
+                .forEach(node -> {
+                    if (Config.donorRanks.contains(node.getKey()))
+                        user.data().remove(node);
+                });
+        user.data().add(InheritanceNode.builder(rank).build());
+        VelocityBoosters.getPlugin().getProxy().getPlayer(user.getUniqueId()).ifPresent(player -> {
+            if (player.isActive()) {
+                player.sendMessage(miniMessage.parse(Config.PROMOTE_MESSAGE,
+                        Template.of("rank", Utils.capitalize(rank)),
+                        Template.of("player", player.getUsername())));
+            }
+        });
+    }
+
+    private void demote(User user, String rank) {
+        user.getNodes(NodeType.INHERITANCE).stream()
+                .filter(Node::getValue)
+                .forEach(node -> {
+                    if (Config.donorRanks.contains(node.getKey()))
+                        user.data().remove(node);
+                });
+        VelocityBoosters.getPlugin().getProxy().getPlayer(user.getUniqueId()).ifPresent(player -> {
+            if (player.isActive()) {
+                player.sendMessage(miniMessage.parse(Config.DEMOTE_MESSAGE,
+                        Template.of("rank", Utils.capitalize(rank)),
+                        Template.of("player", player.getUsername())));
+            }
+        });
     }
 }

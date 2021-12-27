@@ -2,6 +2,7 @@ package com.alttd.boosterapi.config;
 
 import com.alttd.boosterapi.util.ALogger;
 import io.leangen.geantyref.TypeToken;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -180,5 +181,18 @@ public final class Config {
     public static List<String> donorRanks = new ArrayList<>();
     private static void loadDonorStuff() {
         donorRanks = getList("donor.ranks", donorRanks);
+    }
+
+    public static String INVALID_USER = "<red><player> does not exist.</red>";
+    public static String INVALID_ACTION = "<red><action> is not a valid action user promote or demote.</red>";
+    public static String INVALID_DONOR_RANK = "<red><rank> is not a valid donor rank.</red>";
+    public static String DEMOTE_MESSAGE = "<red>Your <rank> rank was refunded and removed. Contact staff if you're unsure what caused this.</red>";
+    public static String PROMOTE_MESSAGE = "<green>Thank you for your support! We applied the <rank> rank to your account.</green>";
+    private static void loadMessages() {
+        INVALID_USER = getString("messages.invalid-user", INVALID_USER);
+        INVALID_ACTION = getString("messages.invalid-action", INVALID_ACTION);
+        INVALID_DONOR_RANK = getString("messages.invalid-donor-rank", INVALID_DONOR_RANK);
+        DEMOTE_MESSAGE = getString("messages.demote", DEMOTE_MESSAGE);
+        PROMOTE_MESSAGE = getString("messages.promote", PROMOTE_MESSAGE);
     }
 }

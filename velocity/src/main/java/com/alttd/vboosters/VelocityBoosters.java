@@ -6,6 +6,7 @@ import com.alttd.boosterapi.util.ALogger;
 import com.alttd.proxydiscordlink.DiscordLink;
 import com.alttd.proxydiscordlink.bot.api.DiscordSendMessage;
 import com.alttd.vboosters.commands.BoosterCommand;
+import com.alttd.vboosters.commands.DonorRankCommand;
 import com.alttd.vboosters.listeners.PluginMessageListener;
 import com.alttd.vboosters.managers.BoosterManager;
 import com.google.inject.Inject;
@@ -79,6 +80,7 @@ public class VelocityBoosters {
     public void loadCommands() {
         // all (proxy)commands go here
         new BoosterCommand(server);
+        new DonorRankCommand(server);
     }
 
     public ChannelIdentifier getChannelIdentifier() {

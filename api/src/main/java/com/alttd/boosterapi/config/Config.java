@@ -177,4 +177,15 @@ public final class Config {
         pluginMessageChannel = getString("settings.message-channel", pluginMessageChannel);
     }
 
+    public static boolean announceInDiscord = false;
+    public static String channelId = "776590138296893483";
+    public static String messageTitle = "Booster Activated";
+    public static String messageBody = "<user> activated booster of type <boostertype> for <time> hours.";
+    private static void discordSettings() {
+        announceInDiscord = getBoolean("settings.discord.enabled", announceInDiscord);
+        channelId = getString("settings.discord.channel", channelId);
+        messageTitle = getString("settings.discord.message-ttitle", messageTitle);
+        messageBody = getString("settings.discord.message-body", messageBody);
+    }
+
 }

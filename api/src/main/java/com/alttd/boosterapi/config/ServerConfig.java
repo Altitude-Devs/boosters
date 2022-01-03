@@ -70,5 +70,8 @@ public final class ServerConfig {
     }
 
     /** DO NOT EDIT ANYTHING ABOVE **/
-
+    public boolean useBoosters = false;
+    private void serverSettings() {
+        useBoosters = getBoolean("use-boosters", useBoosters);
+    }
 }

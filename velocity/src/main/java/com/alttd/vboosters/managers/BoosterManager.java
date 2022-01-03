@@ -3,12 +3,18 @@ package com.alttd.vboosters.managers;
 import com.alttd.boosterapi.Booster;
 import com.alttd.boosterapi.BoosterType;
 import com.alttd.boosterapi.config.Config;
+import com.alttd.boosterapi.database.Database;
 import com.alttd.vboosters.VelocityBoosters;
+import com.alttd.vboosters.data.VelocityBooster;
 import com.velocitypowered.api.scheduler.ScheduledTask;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -24,6 +30,7 @@ public class BoosterManager {
         plugin = velocityBoosters;
         activeBoosters = new ArrayList<>();
         queuedBoosters = new ArrayList<>();
+        loadBoosters(); // load all boosters from sql and activate them if needed
         /*
          * This is mainly used to count down the active boosters and
          * let backend servers know if one should be activated/deactivated
@@ -49,7 +56,25 @@ public class BoosterManager {
     }
 
     public void loadBoosters() {
-        // load boosters from datastorage and check them one by one to activate them
+        // TODO : move into dedicated class?
+        String query = "SELECT * FROM boosters where finished = 0";
+        try {
+            Connection connection = Database.getConnection();
+            ResultSet resultSet = connection.prepareStatement(query).executeQuery();
+            while (resultSet.next()) {
+                UUID uuid = UUID.fromString(resultSet.getString("uuid"));
+                BoosterType boosterType = BoosterType.getByName(resultSet.getString("type"));
+                if (boosterType == null) continue;
+                int level = resultSet.getInt("type");
+                long duration = resultSet.getLong("timeremaining");
+                String activator = resultSet.getString("activator");
+                Booster booster = new VelocityBooster(boosterType, activator, duration, level);
+                addBooster(booster);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         for (BoosterType type : BoosterType.values()) {
             if (isBoosted(type)) {
                 Booster activeBooster = getBoosted(type);
@@ -145,5 +170,7 @@ public class BoosterManager {
         activeBoosters = null;
         queuedBoosters = null;
     }
+
+
 
 }

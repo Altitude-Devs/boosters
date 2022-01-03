@@ -8,6 +8,7 @@ import com.alttd.proxydiscordlink.bot.api.DiscordSendMessage;
 import com.alttd.vboosters.commands.BoosterCommand;
 import com.alttd.vboosters.listeners.PluginMessageListener;
 import com.alttd.vboosters.managers.BoosterManager;
+import com.alttd.vboosters.managers.ServerManager;
 import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
@@ -33,6 +34,7 @@ public class VelocityBoosters {
 
     private BoosterAPI boosterAPI;
     private BoosterManager boosterManager;
+    private ServerManager serverManager;
 
     private ChannelIdentifier channelIdentifier = MinecraftChannelIdentifier.from("altitude:boosterplugin");
 
@@ -48,7 +50,7 @@ public class VelocityBoosters {
         ALogger.init(logger);
         boosterAPI = new BoosterImplementation();
         boosterManager = new BoosterManager(this);
-
+        serverManager = new ServerManager(this);
         server.getChannelRegistrar().register(channelIdentifier);
         server.getEventManager().register(this, new PluginMessageListener(channelIdentifier));
 

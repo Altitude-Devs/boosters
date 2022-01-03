@@ -18,6 +18,8 @@ dependencies {
         exclude("net.kyori")
         exclude("net.kyori.examination")
     }
+    //Luckperms
+    compileOnly("net.luckperms:api:5.3")
 }
 
 tasks {

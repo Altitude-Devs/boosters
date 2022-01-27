@@ -22,6 +22,8 @@ public interface Booster {
 
     Long getDuration();
 
+    String getTimeDuration();
+
     void setDuration(long duration);
 
     String getActivator();

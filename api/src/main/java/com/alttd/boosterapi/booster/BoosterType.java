@@ -44,10 +44,7 @@ public enum BoosterType {
      * PHANTOM - Disables phantom spawns while this booster is active
      */
     PHANTOM("phantom"),
-    /**
-     * IDK
-     */
-    UNKNOWN("unknown");
+    ERROR("error");
 
     public final String BoosterName;
     BoosterType(String BoosterName) {
@@ -64,7 +61,7 @@ public enum BoosterType {
                 return type;
             }
         }
-        return UNKNOWN;
+        return ERROR;
     }
 
 }

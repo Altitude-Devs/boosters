@@ -25,43 +25,46 @@ public class DonorRankCommand {
     private final MiniMessage miniMessage;
 
     public DonorRankCommand(ProxyServer proxyServer) {
-        miniMessage = MiniMessage.get();
+        miniMessage = MiniMessage.miniMessage();
         LiteralCommandNode<CommandSource> command = LiteralArgumentBuilder
                 .<CommandSource>literal("donorrank")
                 .requires(ctx -> ctx.hasPermission("command.proxy.donorrank"))
                 .then(RequiredArgumentBuilder.argument("username", StringArgumentType.word()))
                 .then(RequiredArgumentBuilder.argument("action", StringArgumentType.word()))
-                .then(RequiredArgumentBuilder.argument("rank", StringArgumentType.word()))
-                .executes(context -> {
+                .then(RequiredArgumentBuilder//.argument("rank", StringArgumentType.word())
+                        .<CommandSource, String>argument("rank", StringArgumentType.word())
+                        .executes(
+                                context -> {
 
-                    String username = context.getArgument("username", String.class);
-                    String action = context.getArgument("context", String.class);
-                    String rank = context.getArgument("rank", String.class);
+                                    String username = context.getArgument("username", String.class);
+                                    String action = context.getArgument("context", String.class);
+                                    String rank = context.getArgument("rank", String.class);
 
-                    LuckPerms luckPerms = BoosterAPI.get().getLuckPerms();
-                    User user = luckPerms.getUserManager().getUser(username); //TODO test if this works with username
+                                    LuckPerms luckPerms = BoosterAPI.get().getLuckPerms();
+                                    User user = luckPerms.getUserManager().getUser(username); //TODO test if this works with username
 
-                    if (user == null) {
-                        context.getSource().sendMessage(miniMessage.parse(
-                                Config.INVALID_USER,
-                                Template.of("player", username)));
-                        return 1;
-                    }
+                                    if (user == null) {
+                                        context.getSource().sendMessage(miniMessage.parse(
+                                                Config.INVALID_USER,
+                                                Template.of("player", username)));
+                                        return 1;
+                                    }
 
-                    if (!Config.donorRanks.contains(context.getInput())) {
-                        context.getSource().sendMessage(miniMessage.parse(
-                                Config.INVALID_DONOR_RANK,
-                                Template.of("rank", rank)));
-                        return 1;
-                    }
+                                    if (!Config.donorRanks.contains(context.getInput())) {
+                                        context.getSource().sendMessage(miniMessage.parse(
+                                                Config.INVALID_DONOR_RANK,
+                                                Template.of("rank", rank)));
+                                        return 1;
+                                    }
 
-                    switch (action) {
-                        case "promote" -> promote(user, rank);
-                        case "demote" -> demote(user, rank);
-                        default -> context.getSource().sendMessage(miniMessage.parse(Config.INVALID_ACTION));
-                    }
-                    return 1;
-                })
+                                    switch (action) {
+                                        case "promote" -> promote(user, rank);
+                                        case "demote" -> demote(user, rank);
+                                        default -> context.getSource().sendMessage(miniMessage.parse(Config.INVALID_ACTION));
+                                    }
+                                    return 1;
+                                }
+                        ))
                 .build();
 
         BrigadierCommand brigadierCommand = new BrigadierCommand(command);

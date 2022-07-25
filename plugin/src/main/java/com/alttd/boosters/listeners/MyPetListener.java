@@ -15,7 +15,7 @@ public class MyPetListener implements Listener {
         BoosterManager bm = BoostersPlugin.getInstance().getBoosterManager();
         if(bm.isBoosted(BoosterType.MYPET)) {
             Booster b = bm.getBooster(BoosterType.MYPET);
-            int multiplier = b.getMultiplier();
+            double multiplier = b.getMultiplier();
             event.setExp(event.getExp() * multiplier);
         }
     }

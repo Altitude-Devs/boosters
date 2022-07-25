@@ -11,11 +11,11 @@ public class Booster implements com.alttd.boosterapi.Booster {
     private Long startingTime;
     private long duration;
     private BoosterType boosterType;
-    private Integer multiplier;
+    private Double multiplier;
     private Boolean active;
     private Boolean finished;
 
-    public Booster(UUID uuid, BoosterType boosterType, String reason, long duration, int multiplier) {
+    public Booster(UUID uuid, BoosterType boosterType, String reason, long duration, double multiplier) {
         this.uuid = uuid;
         this.boosterType = boosterType;
         this.activator = reason;
@@ -26,7 +26,7 @@ public class Booster implements com.alttd.boosterapi.Booster {
         saveBooster();
     }
 
-    public Booster(BoosterType type, String playerName, long duration, int multiplier) {
+    public Booster(BoosterType type, String playerName, long duration, double multiplier) {
         this(UUID.randomUUID(), type, playerName, duration, multiplier);
     }
 
@@ -51,12 +51,12 @@ public class Booster implements com.alttd.boosterapi.Booster {
     }
 
     @Override
-    public int getMultiplier() {
+    public double getMultiplier() {
         return multiplier;
     }
 
     @Override
-    public void setMultiplier(int multiplier) {
+    public void setMultiplier(double multiplier) {
         this.multiplier = multiplier;
     }
 

@@ -15,16 +15,16 @@ public class MCmmoListener implements Listener {
         BoosterManager bm = BoostersPlugin.getInstance().getBoosterManager();
         if (bm.isBoosted(BoosterType.MCMMO)) {
             Booster b = bm.getBooster(BoosterType.MCMMO);
-            int multiplier = b.getMultiplier();
-            event.setRawXpGained(event.getRawXpGained() * multiplier);
+            double multiplier = b.getMultiplier();
+            event.setRawXpGained(Math.round(event.getRawXpGained() * multiplier));
             return;
         }
         String skillName = event.getSkill().name();
         BoosterType type = BoosterType.getByName(skillName);
         if (bm.isBoosted(type)) {
             Booster b = bm.getBooster(type);
-            int multiplier = b.getMultiplier();
-            event.setRawXpGained(event.getRawXpGained() * multiplier);
+            double multiplier = b.getMultiplier();
+            event.setRawXpGained(Math.round(event.getRawXpGained() * multiplier));
             return;
         }
     }

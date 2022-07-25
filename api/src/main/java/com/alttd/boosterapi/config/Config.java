@@ -178,6 +178,11 @@ public final class Config {
         pluginMessageChannel = getString("settings.message-channel", pluginMessageChannel);
     }
 
+    public static long BOOST_ANNOUNCE_CHANNEL = -1;
+    private static void announceChannels() {
+        BOOST_ANNOUNCE_CHANNEL = getLong("settings.boost-announce-channel", BOOST_ANNOUNCE_CHANNEL);
+    }
+
     public static List<String> donorRanks = new ArrayList<>();
     private static void loadDonorStuff() {
         donorRanks = getList("donor.ranks", donorRanks);

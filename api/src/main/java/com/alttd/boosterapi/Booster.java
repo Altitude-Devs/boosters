@@ -12,9 +12,9 @@ public interface Booster {
 
     void setType(BoosterType boosterType);
 
-    int getMultiplier();
+    double getMultiplier();
 
-    void setMultiplier(int multiplier);
+    void setMultiplier(double multiplier);
 
     Long getStartingTime();
 

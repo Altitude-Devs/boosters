@@ -2,7 +2,10 @@ package com.alttd.vboosters.data;
 
 import com.alttd.boosterapi.Booster;
 import com.alttd.boosterapi.BoosterType;
+import com.alttd.vboosters.storage.VelocityBoosterStorage;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 public class VelocityBooster implements Booster {
@@ -29,6 +32,18 @@ public class VelocityBooster implements Booster {
 
     public VelocityBooster(BoosterType type, String playerName, long duration, double multiplier) {
         this(UUID.randomUUID(), type, playerName, duration, multiplier);
+    }
+
+    public VelocityBooster(UUID uuid, String activator, BoosterType boosterType, long startingTime,
+                           long duration, double multiplier, boolean active, boolean finished) {
+        this.uuid = uuid;
+        this.activator = activator;
+        this.boosterType = boosterType;
+        this.startingTime = startingTime;
+        this.duration = duration;
+        this.multiplier = multiplier;
+        this.active = active;
+        this.finished = finished;
     }
 
     @Override
@@ -105,7 +120,7 @@ public class VelocityBooster implements Booster {
     }
 
     @Override
-    public void stopBooster() {
+    public void stopBooster() { //TODO stop it on the servers as well
         setDuration(getTimeRemaining());
         setActive(false);
         saveBooster();
@@ -113,10 +128,12 @@ public class VelocityBooster implements Booster {
 
     @Override
     public void saveBooster() {
-        // logic to save to yaml or to db
+        VelocityBoosterStorage vbs = VelocityBoosterStorage.getVelocityBoosterStorage();
+        vbs.getBoosters().put(uuid, this);
+        vbs.saveBoosters(vbs.getBoosters().values());
     }
 
-    public void finish() {
+    public void finish() { //TODO finish it on the servers as well
         finished = true;
         stopBooster();
     }

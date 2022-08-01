@@ -16,6 +16,11 @@ dependencies {
     compileOnly("com.sk89q.worldguard:worldguard-core:7.0.4") {
         exclude("com.google.code.findbugs")
     }
+
+    //Jackson (json)
+    compileOnly("com.fasterxml.jackson.core:jackson-core:2.8.8")
+    compileOnly("com.fasterxml.jackson.core:jackson-annotations:2.8.8")
+    compileOnly("com.fasterxml.jackson.core:jackson-databind:2.8.8")
 }
 
 tasks {

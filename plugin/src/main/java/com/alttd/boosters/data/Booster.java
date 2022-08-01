@@ -1,6 +1,7 @@
 package com.alttd.boosters.data;
 
 import com.alttd.boosterapi.BoosterType;
+import com.alttd.boosterapi.util.ALogger;
 
 import java.util.UUID;
 
@@ -23,11 +24,21 @@ public class Booster implements com.alttd.boosterapi.Booster {
         this.multiplier = multiplier;
         this.active = false;
         this.finished = false;
-        saveBooster();
     }
 
     public Booster(BoosterType type, String playerName, long duration, double multiplier) {
         this(UUID.randomUUID(), type, playerName, duration, multiplier);
+    }
+
+    public Booster(UUID uuid, String activator, BoosterType boosterType, long startingTime, long duration, double multiplier, boolean active, boolean finished) {
+        this.uuid = uuid;
+        this.activator = activator;
+        this.boosterType = boosterType;
+        this.startingTime = startingTime;
+        this.duration = duration;
+        this.multiplier = multiplier;
+        this.active = active;
+        this.finished = finished;
     }
 
     @Override
@@ -105,17 +116,19 @@ public class Booster implements com.alttd.boosterapi.Booster {
 
     @Override
     public void stopBooster() {
-
+        setDuration(getTimeRemaining());
+        setActive(false);
     }
 
     @Override
     public void saveBooster() {
-
+        ALogger.error("Tried saving booster from server instead of proxy, only proxy should handle saving boosters");
     }
 
     @Override
     public void finish() {
-
+        finished = true;
+        stopBooster();
     }
 
     @Override

@@ -28,6 +28,11 @@ public abstract class BoosterStorage {
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
+    public void reload() {
+        boosters.clear();
+        loadBoosters();
+    }
+
     public Map<UUID, Booster> getBoosters() {
         return boosters;
     }

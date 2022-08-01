@@ -124,6 +124,9 @@ public class VelocityBooster implements Booster {
         setDuration(getTimeRemaining());
         setActive(false);
         saveBooster();
+        if (!finished) {
+            //TODO send plugin message that its stopped
+        }
     }
 
     @Override
@@ -136,6 +139,7 @@ public class VelocityBooster implements Booster {
     public void finish() { //TODO finish it on the servers as well
         finished = true;
         stopBooster();
+        //TODO send plugin message that this is finished
     }
 
     @Override

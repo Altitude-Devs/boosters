@@ -9,6 +9,7 @@ import com.alttd.vboosters.commands.BoosterCommand;
 import com.alttd.vboosters.commands.DonorRankCommand;
 import com.alttd.vboosters.listeners.PluginMessageListener;
 import com.alttd.vboosters.managers.BoosterManager;
+import com.alttd.vboosters.storage.VelocityBoosterStorage;
 import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
@@ -54,6 +55,7 @@ public class VelocityBoosters {
         server.getEventManager().register(this, new PluginMessageListener(channelIdentifier));
 
         loadCommands();
+        VelocityBoosterStorage.getVelocityBoosterStorage(); //this loads the boosters in
     }
 
     @Subscribe

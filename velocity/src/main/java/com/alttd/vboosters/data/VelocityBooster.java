@@ -6,6 +6,7 @@ import com.alttd.vboosters.storage.VelocityBoosterStorage;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Date;
 import java.util.UUID;
 
 public class VelocityBooster implements Booster {
@@ -27,6 +28,7 @@ public class VelocityBooster implements Booster {
         this.multiplier = multiplier;
         this.active = false;
         this.finished = false;
+        this.startingTime = new Date().getTime();
         saveBooster();
     }
 

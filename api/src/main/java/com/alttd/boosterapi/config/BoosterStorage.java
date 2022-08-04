@@ -1,6 +1,7 @@
 package com.alttd.boosterapi.config;
 
 import com.alttd.boosterapi.Booster;
+import com.alttd.boosterapi.util.ALogger;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -22,7 +23,19 @@ public abstract class BoosterStorage {
     }
     private void init() {
         File CONFIG_PATH = new File(System.getProperty("user.home") + File.separator + "share" + File.separator + "configs" + File.separator + "Boosters");
+        if (!CONFIG_PATH.exists()) {
+            if (!CONFIG_PATH.mkdir())
+                ALogger.error("Unable to create json storage directory");
+        }
         CONFIG_FILE = new File(CONFIG_PATH, "storage.json");
+        if (!CONFIG_FILE.exists()) {
+            try {
+                if (!CONFIG_FILE.createNewFile())
+                    ALogger.error("Unable to create json storeage file");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -42,8 +55,13 @@ public abstract class BoosterStorage {
 
         try {
             JsonParser parser = new JsonFactory().createParser(CONFIG_FILE);
-            Booster booster = loadBooster(parser);
-            boosters.put(booster.getUUID(), booster);
+            if (parser == null)
+                return boosters;
+            while (parser.hasCurrentToken()) {
+                Booster booster = loadBooster(parser);
+                boosters.put(booster.getUUID(), booster);
+                parser.nextToken();
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

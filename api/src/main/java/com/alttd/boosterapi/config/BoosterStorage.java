@@ -18,6 +18,7 @@ public abstract class BoosterStorage {
     private File CONFIG_FILE;
     private final Map<UUID, Booster> boosters;
     protected BoosterStorage() {
+        ALogger.info("Loading boosters...");
         init();
         boosters = loadBoosters();
     }
@@ -43,7 +44,7 @@ public abstract class BoosterStorage {
 
     public void reload() {
         boosters.clear();
-        loadBoosters();
+        boosters.putAll(loadBoosters());
     }
 
     public Map<UUID, Booster> getBoosters() {
@@ -55,13 +56,24 @@ public abstract class BoosterStorage {
 
         try {
             JsonParser parser = new JsonFactory().createParser(CONFIG_FILE);
-            if (parser == null)
+            if (parser == null) {
+                ALogger.warn("Unable to load in boosters from storage file.");
                 return boosters;
-            while (parser.hasCurrentToken()) {
+            }
+            parser.nextToken();
+            while (parser.currentToken() != null && parser.currentToken().isStructStart()) {
                 Booster booster = loadBooster(parser);
+                if (Config.DEBUG)
+                    ALogger.info("Loading booster [" + booster.getType() + "] activated by [" + booster.getActivator()+ "].");
                 boosters.put(booster.getUUID(), booster);
+                if (parser.nextToken() != null && !parser.currentToken().isStructEnd()) {
+                    ALogger.warn("Last loaded booster had more data than expected, skipping it...");
+                    while (!parser.nextToken().isStructEnd())
+                        ;
+                }
                 parser.nextToken();
             }
+            parser.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -77,6 +89,7 @@ public abstract class BoosterStorage {
             for (Booster booster : boosters) {
                 saveBooster(booster, generator);
             }
+            generator.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

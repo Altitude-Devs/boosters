@@ -26,7 +26,7 @@ public class ServerBoosterStorage extends BoosterStorage {
 
     @Override
     public Booster loadBooster(JsonParser parser) throws IOException {
-        JsonToken jsonToken = parser.nextToken();
+        JsonToken jsonToken = parser.currentToken();
         if (!jsonToken.isStructStart())
             return error("Didn't find struct start");
 

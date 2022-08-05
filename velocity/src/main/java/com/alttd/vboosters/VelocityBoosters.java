@@ -2,6 +2,8 @@ package com.alttd.vboosters;
 
 import com.alttd.boosterapi.BoosterAPI;
 import com.alttd.boosterapi.BoosterImplementation;
+import com.alttd.boosterapi.config.Config;
+import com.alttd.boosterapi.config.ServerConfig;
 import com.alttd.boosterapi.util.ALogger;
 import com.alttd.proxydiscordlink.DiscordLink;
 import com.alttd.proxydiscordlink.bot.api.DiscordSendMessage;
@@ -55,6 +57,7 @@ public class VelocityBoosters {
         server.getEventManager().register(this, new PluginMessageListener(channelIdentifier));
 
         loadCommands();
+        reloadConfig();
         VelocityBoosterStorage.getVelocityBoosterStorage(); //this loads the boosters in
     }
 

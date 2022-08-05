@@ -200,4 +200,9 @@ public final class Config {
         DEMOTE_MESSAGE = getString("messages.demote", DEMOTE_MESSAGE);
         PROMOTE_MESSAGE = getString("messages.promote", PROMOTE_MESSAGE);
     }
+
+    public static boolean DEBUG = false;
+    private static void loadSettings() {
+        DEBUG = getBoolean("settings.debug", DEBUG);
+    }
 }

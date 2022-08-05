@@ -142,8 +142,8 @@ public class BoosterManager {
         for (Booster b : queuedBoosters) {
             b.saveBooster();
         }
-        activeBoosters = null;
-        queuedBoosters = null;
+        activeBoosters.clear();
+        queuedBoosters.clear();
     }
 
 }

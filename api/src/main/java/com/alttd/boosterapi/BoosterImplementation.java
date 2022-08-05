@@ -1,6 +1,7 @@
 package com.alttd.boosterapi;
 
 import com.alttd.boosterapi.config.Config;
+import com.alttd.boosterapi.config.ServerConfig;
 import com.alttd.boosterapi.database.Database;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;

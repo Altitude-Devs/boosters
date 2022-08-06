@@ -8,7 +8,7 @@ dependencies {
     // API
     implementation(project(":boosters-api"))
     // Galaxy
-    compileOnly("com.alttd:Galaxy-API:1.18.1-R0.1-SNAPSHOT")
+    compileOnly("com.alttd:Galaxy-API:1.19.2-R0.1-SNAPSHOT")
     // MyPet
     compileOnly("de.keyle:mypet:3.12-SNAPSHOT")
     // mcMMO

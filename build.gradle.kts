@@ -54,7 +54,6 @@ dependencies {
     implementation(project(":boosters-api"))
     implementation(project(":plugin"))
     implementation(project(":velocity"))
-//    implementation("net.kyori", "adventure-text-minimessage", "4.2.0-SNAPSHOT")
 }
 
 tasks {
@@ -67,7 +66,7 @@ tasks {
             exclude { it.moduleName == "velocity" }
         }
         listOf(
-            "net.kyori.adventure.text.minimessage",
+//            "net.kyori.adventure.text.minimessage",
             "org.spongepowered.configurate"
         ).forEach { relocate(it, "${rootProject.name}.lib.$it") }
     }

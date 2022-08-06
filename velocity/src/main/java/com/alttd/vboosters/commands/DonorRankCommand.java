@@ -16,6 +16,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.Template;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.Node;
@@ -30,7 +31,7 @@ public class DonorRankCommand {
     private final MiniMessage miniMessage;
 
     public DonorRankCommand(ProxyServer proxyServer) {
-        miniMessage = MiniMessage.get();
+        miniMessage = MiniMessage.miniMessage();
 
         LiteralCommandNode<CommandSource> command = LiteralArgumentBuilder
                 .<CommandSource>literal("donorrank")
@@ -83,23 +84,23 @@ public class DonorRankCommand {
                                             User user = luckPerms.getUserManager().getUser(username); //TODO test if this works with username
 
                                             if (user == null) {
-                                                commandSource.sendMessage(miniMessage.parse(
+                                                commandSource.sendMessage(miniMessage.deserialize(
                                                         Config.INVALID_USER,
-                                                        Template.of("player", username)));
+                                                        Placeholder.parsed("player", username)));
                                                 return 1;
                                             }
 
                                             if (!Config.donorRanks.contains(rank)) {
-                                                commandSource.sendMessage(miniMessage.parse(
+                                                commandSource.sendMessage(miniMessage.deserialize(
                                                         Config.INVALID_DONOR_RANK,
-                                                        Template.of("rank", rank)));
+                                                        Placeholder.parsed("rank", rank)));
                                                 return 1;
                                             }
 
                                             switch (action) {
                                                 case "promote" -> promote(user, rank);
                                                 case "demote" -> demote(user, rank);
-                                                default -> commandSource.sendMessage(miniMessage.parse(Config.INVALID_ACTION));
+                                                default -> commandSource.sendMessage(miniMessage.deserialize(Config.INVALID_ACTION));
                                             }
                                             return 1;
                                         })
@@ -129,9 +130,9 @@ public class DonorRankCommand {
         user.data().add(InheritanceNode.builder(rank).build());
         VelocityBoosters.getPlugin().getProxy().getPlayer(user.getUniqueId()).ifPresent(player -> {
             if (player.isActive()) {
-                player.sendMessage(miniMessage.parse(Config.PROMOTE_MESSAGE,
-                        Template.of("rank", Utils.capitalize(rank)),
-                        Template.of("player", player.getUsername())));
+                player.sendMessage(miniMessage.deserialize(Config.PROMOTE_MESSAGE,
+                        Placeholder.parsed("rank", Utils.capitalize(rank)),
+                        Placeholder.parsed("player", player.getUsername())));
             }
         });
         luckPerms.getUserManager().saveUser(user);
@@ -147,9 +148,9 @@ public class DonorRankCommand {
                 });
         VelocityBoosters.getPlugin().getProxy().getPlayer(user.getUniqueId()).ifPresent(player -> {
             if (player.isActive()) {
-                player.sendMessage(miniMessage.parse(Config.DEMOTE_MESSAGE,
-                        Template.of("rank", Utils.capitalize(rank)),
-                        Template.of("player", player.getUsername())));
+                player.sendMessage(miniMessage.deserialize(Config.DEMOTE_MESSAGE,
+                        Placeholder.parsed("rank", Utils.capitalize(rank)),
+                        Placeholder.parsed("player", player.getUsername())));
             }
         });
         luckPerms.getUserManager().saveUser(user);

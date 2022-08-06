@@ -25,6 +25,8 @@ import com.velocitypowered.api.util.GameProfile;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.Template;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 
 import java.text.DateFormat;
 import java.util.*;
@@ -47,7 +49,7 @@ public class BoosterCommand {
         return builder.buildFuture();
     }
 
-    private static MiniMessage miniMessage = MiniMessage.get();
+    private static MiniMessage miniMessage = MiniMessage.miniMessage();
     public BoosterCommand(ProxyServer proxyServer) {
         LiteralCommandNode<CommandSource> command = LiteralArgumentBuilder
                 .<CommandSource>literal("booster")
@@ -60,24 +62,28 @@ public class BoosterCommand {
                     List<Component> queuedBoosterComponents = new ArrayList<>();
                     for (Booster booster : VelocityBoosterStorage.getVelocityBoosterStorage().getBoosters().values()) {
                         long expiryTime = new Date().getTime() + booster.getDuration();
-                        ArrayList<Template> templates = new ArrayList<>(List.of(
-                                Template.of("activator", booster.getActivator()),
-                                Template.of("start_time", DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(booster.getStartingTime())),
-                                Template.of("duration", String.valueOf(booster.getDuration())),
-                                Template.of("multiplier", String.valueOf(booster.getMultiplier()))));
+                        TagResolver templates = TagResolver.resolver(
+                                Placeholder.parsed("activator", booster.getActivator()),
+                                Placeholder.parsed("start_time", DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(booster.getStartingTime())),
+                                Placeholder.parsed("duration", String.valueOf(booster.getDuration())),
+                                Placeholder.parsed("multiplier", String.valueOf(booster.getMultiplier())));
                         if (booster.isActive())
-                            templates.add(Template.of("end_time", DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(expiryTime)));
+                            templates = TagResolver.resolver(
+                                    templates,
+                                  Placeholder.parsed("end_time", DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(expiryTime)));
                         else
-                            templates.add(Template.of("end_time", "unknown"));
+                            templates =  TagResolver.resolver(
+                                    templates,
+                                    Placeholder.parsed("end_time", "unknown"));
                         if (booster.isActive())
-                            activeBoosterComponents.add(miniMessage.parse(activeBooster, templates));
+                            activeBoosterComponents.add(miniMessage.deserialize(activeBooster, templates));
                         else
-                            queuedBoosterComponents.add(miniMessage.parse(queuedBooster, templates));
+                            queuedBoosterComponents.add(miniMessage.deserialize(queuedBooster, templates));
                     }
-                    Component separator = miniMessage.parse("\n");
-                    context.getSource().sendMessage(miniMessage.parse(message, List.of(
-                            Template.of("active_boosters", Component.join(separator, activeBoosterComponents)),
-                            Template.of("queued_boosters", Component.join(separator, queuedBoosterComponents))
+                    Component separator = miniMessage.deserialize("\n");
+                    context.getSource().sendMessage(miniMessage.deserialize(message, TagResolver.resolver(
+                            Placeholder.component("active_boosters", Component.join(separator, activeBoosterComponents)),
+                            Placeholder.component("queued_boosters", Component.join(separator, queuedBoosterComponents))
                     )));
                     return 1;
                 })
@@ -107,7 +113,7 @@ public class BoosterCommand {
                                                 DiscordSendMessage.sendEmbed(Config.BOOST_ANNOUNCE_CHANNEL, "Booster Activated", msg.replaceAll("%date%", "<t:" + expiryTime + ":f>"));
                                                 String mcMessage = msg.replaceAll("%date%", DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(expiryTime));
                                                 mcMessage += " [UTC]";
-                                                VelocityBoosters.getPlugin().getProxy().sendMessage(MiniMessage.markdown().parse(mcMessage));
+                                                VelocityBoosters.getPlugin().getProxy().sendMessage(miniMessage.deserialize(mcMessage));
                                                 VelocityBoosters.getPlugin().getLogger().info(mcMessage);
                                                 return 1;
                                             })

@@ -115,7 +115,7 @@ public class BoosterCommand {
                                 )
                         )
                 )
-                .executes(context -> 1)
+//                .executes(context -> 1)
                 .build();
 
         BrigadierCommand brigadierCommand = new BrigadierCommand(command);

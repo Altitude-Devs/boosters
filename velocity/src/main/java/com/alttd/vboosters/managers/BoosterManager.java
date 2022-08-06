@@ -1,14 +1,15 @@
 package com.alttd.vboosters.managers;
 
-import com.alttd.boosterapi.Booster;
-import com.alttd.boosterapi.BoosterType;
+import com.alttd.boosterapi.booster.Booster;
+import com.alttd.boosterapi.booster.BoosterState;
+import com.alttd.boosterapi.booster.BoosterType;
 import com.alttd.boosterapi.config.Config;
-import com.alttd.boosterapi.database.Database;
+import com.alttd.boosterapi.database.Queries;
+import com.alttd.boosterapi.util.ALogger;
 import com.alttd.vboosters.VelocityBoosters;
 import com.alttd.vboosters.data.VelocityBooster;
 import com.velocitypowered.api.scheduler.ScheduledTask;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class BoosterManager {
         plugin = velocityBoosters;
         activeBoosters = new ArrayList<>();
         queuedBoosters = new ArrayList<>();
-        loadBoosters(); // load all boosters from sql and activate them if needed
+        loadAllBoosters();
         /*
          * This is mainly used to count down the active boosters and
          * let backend servers know if one should be activated/deactivated
@@ -38,10 +39,10 @@ public class BoosterManager {
         boostersTask = plugin.getProxy().getScheduler().buildTask(plugin, () -> {
             for (Booster booster: getActiveBoosters()) {
                 if (booster.getTimeRemaining() > 0) continue;
-                booster.finish();
+                booster.updateState(BoosterState.FINISHED);
                 // send data to the backend servers to let them know the booster is no longer active
             }
-            getActiveBoosters().removeIf(Booster::finished);
+            getActiveBoosters().removeIf(booster -> booster.getState() == BoosterState.FINISHED);
             for (BoosterType type : BoosterType.values()) {
                 if (!isBoosted(type)) { // activate a queud booster if needed
                     Booster queuedBooster = getHighestBooster(type);
@@ -51,30 +52,32 @@ public class BoosterManager {
                     // send an update to the backend servers to let them know this booster is active
                 }
             }
-            getQueuedBoosters().removeIf(Booster::finished);
+            getActiveBoosters().removeIf(booster -> booster.getState() == BoosterState.FINISHED);
         }).repeat(Config.activeTaskCheckFrequency, TimeUnit.SECONDS).schedule();
     }
 
-    public void loadBoosters() {
-        // TODO : move into dedicated class?
-        String query = "SELECT * FROM boosters where finished = 0";
+    public void loadAllBoosters() {
         try {
-            Connection connection = Database.getConnection();
-            ResultSet resultSet = connection.prepareStatement(query).executeQuery();
-            while (resultSet.next()) {
-                UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                BoosterType boosterType = BoosterType.getByName(resultSet.getString("type"));
-                if (boosterType == null) continue;
-                int level = resultSet.getInt("type");
-                long duration = resultSet.getLong("timeremaining");
-                String activator = resultSet.getString("activator");
-                Booster booster = new VelocityBooster(boosterType, activator, duration, level);
-                addBooster(booster);
+            ResultSet rs = Queries.getNonFinishedBoosters();
+            if (rs == null) return;
+            while (rs.next()) {
+                //uuid, type, state, multiplier, duration, activator, timeremaining
+                UUID uuid = UUID.fromString(rs.getString("uuid"));
+                BoosterType boosterType = BoosterType.getByName(rs.getString("type"));
+                BoosterState boosterState = BoosterState.getByName(rs.getString("state"));
+                int multiplier = rs.getInt("multiplier");
+//                        long duration = rs.getLong("duration");
+                String activator = rs.getString("activator");
+                long timeremaining = rs.getLong("timeremaining");
+                addBooster(new VelocityBooster(uuid, boosterType, boosterState, activator, timeremaining, multiplier));
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException ex) {
+            ALogger.fatal("Error loading booster", ex);
         }
+        loadBoosters();
+    }
 
+    public void loadBoosters() {
         for (BoosterType type : BoosterType.values()) {
             if (isBoosted(type)) {
                 Booster activeBooster = getBoosted(type);
@@ -104,11 +107,6 @@ public class BoosterManager {
         }
     }
 
-    public void removeBooster(Booster booster) {
-        activeBoosters.remove(booster);
-        booster.stopBooster();
-    }
-
     public void swapBooster(Booster activeBooster, Booster queuedBooster) {
         deactivateBooster(activeBooster);
         activateBooster(queuedBooster);
@@ -117,13 +115,24 @@ public class BoosterManager {
     public void activateBooster(Booster booster) {
         queuedBoosters.remove(booster);
         activeBoosters.add(booster);
-        booster.setActive(true);
+        booster.setStartingTime(System.currentTimeMillis());
+        booster.updateState(BoosterState.ACTIVE);
+        ServerManager.sendBoosterUpdate(booster, "start");
     }
 
     public void deactivateBooster(Booster booster) {
         queuedBoosters.add(booster);
         activeBoosters.remove(booster);
-        booster.setActive(false);
+        booster.updateState(BoosterState.PAUSED);
+        ServerManager.sendBoosterUpdate(booster, "stop");
+    }
+
+    public void removeBooster(Booster booster) {
+        activeBoosters.remove(booster);
+        queuedBoosters.remove(booster);
+        booster.updateState(BoosterState.FINISHED);
+        booster.saveBooster();
+        ServerManager.sendBoosterUpdate(booster, "stop");
     }
 
     public boolean isBoosted(BoosterType type) {
@@ -162,15 +171,14 @@ public class BoosterManager {
 
     public void saveAllBoosters() {
         for (Booster b : activeBoosters) {
-            b.stopBooster();
+            b.updateState(BoosterState.PAUSED);
         }
+        queuedBoosters.addAll(activeBoosters);
+        activeBoosters = null;
         for (Booster b : queuedBoosters) {
             b.saveBooster();
         }
-        activeBoosters = null;
         queuedBoosters = null;
     }
-
-
 
 }

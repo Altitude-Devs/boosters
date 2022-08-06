@@ -1,4 +1,4 @@
-package com.alttd.boosterapi;
+package com.alttd.boosterapi.booster;
 
 import java.util.UUID;
 
@@ -6,15 +6,13 @@ public interface Booster {
 
     boolean isActive();
 
-    void setActive(Boolean active);
-
     BoosterType getType();
 
-    void setType(BoosterType boosterType);
+    BoosterState getState();
+
+    void updateState(BoosterState state);
 
     int getMultiplier();
-
-    void setMultiplier(int multiplier);
 
     Long getStartingTime();
 
@@ -28,17 +26,10 @@ public interface Booster {
 
     String getActivator();
 
-    void setActivator(String activationReason);
-
     long getTimeRemaining();
 
     UUID getUUID();
 
-    void stopBooster();
-
     void saveBooster();
 
-    void finish();
-
-    boolean finished();
 }

@@ -1,28 +1,41 @@
-package com.alttd.chat.commands;
+package com.alttd.boosters.commands;
 
-import com.alttd.chat.ChatPlugin;
-import com.alttd.chat.managers.ChatUserManager;
-import com.alttd.chat.objects.ChatUser;
-import org.apache.commons.lang.StringUtils;
+import com.alttd.boosterapi.booster.Booster;
+import com.alttd.boosterapi.booster.BoosterState;
+import com.alttd.boosterapi.config.Config;
+import com.alttd.boosterapi.util.Utils;
+import com.alttd.boosters.BoostersPlugin;
+import com.alttd.boosters.managers.BoosterManager;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.Template;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
-public class Reply implements CommandExecutor {
+import java.util.ArrayList;
+import java.util.List;
+
+public class BoosterList implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if(!(sender instanceof Player)) {
+        BoosterManager boosterManager = BoostersPlugin.getInstance().getBoosterManager();
+        if (!boosterManager.hasBoosters()) {
+            sender.sendMiniMessage("<red>There are no active boosters", null);
             return true;
         }
-        Player player = (Player) sender;
-        ChatUser user = ChatUserManager.getChatUser(player.getUniqueId());
-        if (user.getReplyTarget() == null) return false;
-        if(args.length == 0) return false; // todo error message or command info
-
-        String message = StringUtils.join(args, " ", 0, args.length);
-        ChatPlugin.getInstance().getChatHandler().privateMessage(player, user.getReplyTarget(), message);
-        return false;
+        Component component = Utils.parseMiniMessage("<gold>Active boosters: ", null);
+        for (Booster booster : boosterManager.getBoosters()) {
+            if (booster.getType() == null || booster.getActivator() == null || booster.getDuration() == null || booster.getStartingTime() == null) continue;
+            List<Template> templates = new ArrayList<>(List.of(
+                    Template.template("type", booster.getType().getBoosterName()),
+                    Template.template("reason", booster.getActivator()),
+                    Template.template("duration", booster.getTimeDuration()), // TODO add formatted time string
+                    Template.template("multiplier", booster.getMultiplier()+"")));
+            Component info = Utils.parseMiniMessage(Config.BOOSTERLI, templates);
+            component = component.append(Component.newline()).append(info);
+        }
+        sender.sendMessage(component);
+        return true;
     }
 }

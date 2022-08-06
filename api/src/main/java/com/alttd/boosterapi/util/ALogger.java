@@ -1,7 +1,5 @@
 package com.alttd.boosterapi.util;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
-
 public class ALogger {
 
     private static org.slf4j.Logger logger;
@@ -27,6 +25,6 @@ public class ALogger {
     }
 
     public static void fatal(String error, Exception exception) {
-        logger.error(error + "\n" +  ExceptionUtils.getStackTrace(exception));
+        logger.error(error + "\n" + exception.toString());
     }
 }

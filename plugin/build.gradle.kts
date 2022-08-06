@@ -16,6 +16,10 @@ dependencies {
     compileOnly("com.sk89q.worldguard:worldguard-core:7.0.4") {
         exclude("com.google.code.findbugs")
     }
+    implementation("net.kyori", "adventure-text-minimessage", "4.2.0-SNAPSHOT") {
+        exclude("net.kyori")
+        exclude("net.kyori.examination")
+    }
 }
 
 tasks {
@@ -36,4 +40,11 @@ bukkit {
     apiVersion = "1.18"
     authors = listOf("destro174")
     softDepend = listOf("MyPet", "mcMMO")
+    commands {
+        create("boosterlist") {
+            description = "Show a list of boosters currently active on the server."
+            usage = "/boosterlist"
+            permission = "command.booster"
+        }
+    }
 }

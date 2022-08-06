@@ -5,7 +5,7 @@ include(":velocity")
 
 dependencyResolutionManagement {
     repositories {
-        mavenLocal()
+//        mavenLocal()
         mavenCentral()
         maven("https://repo.destro.xyz/snapshots") // Altitude - Galaxy
         maven("https://oss.sonatype.org/content/groups/public/") // Adventure

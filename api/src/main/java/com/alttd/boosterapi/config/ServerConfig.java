@@ -46,27 +46,27 @@ public final class ServerConfig {
     }
 
     private boolean getBoolean(String path, boolean def) {
-        set(defaultPath +path, def);
-        return Config.config.node(splitPath(configPath+path)).getBoolean(
-                Config.config.node(splitPath(defaultPath +path)).getBoolean(def));
+        set(defaultPath + path, def);
+        return Config.config.node(splitPath(configPath + path)).getBoolean(
+                Config.config.node(splitPath(defaultPath + path)).getBoolean(def));
     }
 
     private double getDouble(String path, double def) {
-        set(defaultPath +path, def);
-        return Config.config.node(splitPath(configPath+path)).getDouble(
-                Config.config.node(splitPath(defaultPath +path)).getDouble(def));
+        set(defaultPath + path, def);
+        return Config.config.node(splitPath(configPath + path)).getDouble(
+                Config.config.node(splitPath(defaultPath + path)).getDouble(def));
     }
 
     private int getInt(String path, int def) {
-        set(defaultPath +path, def);
-        return Config.config.node(splitPath(configPath+path)).getInt(
-                Config.config.node(splitPath(defaultPath +path)).getInt(def));
+        set(defaultPath + path, def);
+        return Config.config.node(splitPath(configPath + path)).getInt(
+                Config.config.node(splitPath(defaultPath + path)).getInt(def));
     }
 
     private String getString(String path, String def) {
-        set(defaultPath +path, def);
-        return Config.config.node(splitPath(configPath+path)).getString(
-                Config.config.node(splitPath(defaultPath +path)).getString(def));
+        set(defaultPath + path, def);
+        return Config.config.node(splitPath(configPath + path)).getString(
+                Config.config.node(splitPath(defaultPath + path)).getString(def));
     }
 
     /** DO NOT EDIT ANYTHING ABOVE **/

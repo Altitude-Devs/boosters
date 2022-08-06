@@ -1,7 +1,7 @@
 package com.alttd.boosters.listeners;
 
-import com.alttd.boosterapi.Booster;
-import com.alttd.boosterapi.BoosterType;
+import com.alttd.boosterapi.booster.Booster;
+import com.alttd.boosterapi.booster.BoosterType;
 import com.alttd.boosters.BoostersPlugin;
 import com.alttd.boosters.managers.BoosterManager;
 import com.gmail.nossr50.events.experience.McMMOPlayerXpGainEvent;

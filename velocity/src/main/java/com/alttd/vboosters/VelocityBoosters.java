@@ -3,8 +3,6 @@ package com.alttd.vboosters;
 import com.alttd.boosterapi.BoosterAPI;
 import com.alttd.boosterapi.BoosterImplementation;
 import com.alttd.boosterapi.util.ALogger;
-import com.alttd.proxydiscordlink.DiscordLink;
-import com.alttd.proxydiscordlink.bot.api.DiscordSendMessage;
 import com.alttd.vboosters.commands.BoosterCommand;
 import com.alttd.vboosters.commands.DonorRankCommand;
 import com.alttd.vboosters.listeners.PluginMessageListener;
@@ -25,7 +23,7 @@ import org.slf4j.Logger;
 @Plugin(id = "boosterplugin", name = "BoosterPlugin", version = "1.0.0",
         description = "Easily manage all boosters on the Altitude Minecraft Server Network.",
         authors = {"destro174", "teri"},
-        dependencies = {@Dependency(id = "luckperms"),@Dependency(id = "proxydiscordlink")}
+        dependencies = {@Dependency(id = "luckperms")/*,@Dependency(id = "proxydiscordlink")*/}
 )
 public class VelocityBoosters {
 
@@ -50,8 +48,8 @@ public class VelocityBoosters {
     public void onProxyInitialization(ProxyInitializeEvent event) {
         ALogger.init(logger);
         boosterAPI = new BoosterImplementation();
-        boosterManager = new BoosterManager(this);
         serverManager = new ServerManager(this);
+        boosterManager = new BoosterManager(this);
         server.getChannelRegistrar().register(channelIdentifier);
         server.getEventManager().register(this, new PluginMessageListener(channelIdentifier));
 
@@ -65,6 +63,7 @@ public class VelocityBoosters {
 
     public void reloadConfig() {
         boosterAPI.reloadConfig();
+        serverManager.cleanup();
     }
 
     public static VelocityBoosters getPlugin() {

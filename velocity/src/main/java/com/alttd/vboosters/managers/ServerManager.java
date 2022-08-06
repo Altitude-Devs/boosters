@@ -1,11 +1,15 @@
 package com.alttd.vboosters.managers;
 
+import com.alttd.boosterapi.booster.Booster;
+import com.alttd.boosterapi.config.Config;
 import com.alttd.boosterapi.config.ServerConfig;
+import com.alttd.boosterapi.util.Utils;
 import com.alttd.vboosters.VelocityBoosters;
 import com.alttd.vboosters.data.ServerWrapper;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import net.kyori.adventure.text.minimessage.Template;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,7 +17,7 @@ import java.util.List;
 
 public class ServerManager {
 
-    private VelocityBoosters plugin;
+    private static VelocityBoosters plugin;
 
     private static List<ServerWrapper> servers;
 
@@ -47,5 +51,19 @@ public class ServerManager {
             }
         }
         return null;
+    }
+
+    public static void sendBoosterUpdate(Booster booster, String status) {
+        servers.stream()
+                .filter(ServerWrapper::useBoosters)
+                .map(ServerWrapper::getRegisteredServer)
+                .forEach(registeredServer -> {
+                    ByteArrayDataOutput buf = ByteStreams.newDataOutput();
+                    buf.writeUTF("booster-update");
+                    buf.writeUTF(booster.getUUID().toString());
+                    buf.writeUTF(status);
+
+                    registeredServer.sendPluginMessage(plugin.getChannelIdentifier(), buf.toByteArray());
+                });
     }
 }

@@ -1,4 +1,4 @@
-package com.alttd.boosterapi;
+package com.alttd.boosterapi.booster;
 
 public enum BoosterType {
 

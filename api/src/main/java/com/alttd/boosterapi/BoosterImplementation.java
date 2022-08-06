@@ -10,12 +10,11 @@ public class BoosterImplementation implements BoosterAPI {
     private static BoosterAPI instance;
 
     private LuckPerms luckPerms;
-    private Database database;
 
     public BoosterImplementation() {
         instance = this;
         reloadConfig();
-
+        Database.initialize();
         luckPerms = getLuckPerms();
     }
 

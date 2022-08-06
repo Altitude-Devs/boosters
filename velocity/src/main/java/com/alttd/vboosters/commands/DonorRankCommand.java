@@ -25,7 +25,7 @@ public class DonorRankCommand {
     private final MiniMessage miniMessage;
 
     public DonorRankCommand(ProxyServer proxyServer) {
-        miniMessage = MiniMessage.miniMessage();
+        miniMessage = MiniMessage.get();
         LiteralCommandNode<CommandSource> command = LiteralArgumentBuilder
                 .<CommandSource>literal("donorrank")
                 .requires(ctx -> ctx.hasPermission("command.proxy.donorrank"))
@@ -37,7 +37,7 @@ public class DonorRankCommand {
                                 context -> {
 
                                     String username = context.getArgument("username", String.class);
-                                    String action = context.getArgument("context", String.class);
+                                    String action = context.getArgument("action", String.class);
                                     String rank = context.getArgument("rank", String.class);
 
                                     LuckPerms luckPerms = BoosterAPI.get().getLuckPerms();

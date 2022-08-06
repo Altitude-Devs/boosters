@@ -52,7 +52,7 @@ public final class Config {
         }
 
         try {
-            config = configLoader.load(ConfigurationOptions.defaults().header(HEADER));
+            config = configLoader.load(ConfigurationOptions.defaults().header(HEADER).shouldCopyDefaults(false));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -167,10 +167,8 @@ public final class Config {
     }
 
     public static Long activeTaskCheckFrequency = 1L;
-    public static Long taskCheckFrequency = 1L;
     private static void boosterTaskSettings() {
         activeTaskCheckFrequency = getLong("task.queue-frequency", activeTaskCheckFrequency);
-        taskCheckFrequency = getLong("task.check-frequency", taskCheckFrequency);
     }
 
     public static String pluginMessageChannel = "altitude:boosterplugin";
@@ -205,6 +203,15 @@ public final class Config {
         INVALID_DONOR_RANK = getString("messages.invalid-donor-rank", INVALID_DONOR_RANK);
         DEMOTE_MESSAGE = getString("messages.demote", DEMOTE_MESSAGE);
         PROMOTE_MESSAGE = getString("messages.promote", PROMOTE_MESSAGE);
+    }
+
+    public static String STARTBOOSTER = "<gold>Booster <type> activated by <reason> for <duration>";
+    public static String STOPBOOSTER = "<red>Booster <type> has ended.";
+    public static String BOOSTERLI = "<type> by <reason> for <duration>";
+    private static void booosterMessages() {
+        STARTBOOSTER = getString("messages.booster.start", STARTBOOSTER);
+        STOPBOOSTER = getString("messages.booster.stop", STOPBOOSTER);
+        BOOSTERLI = getString("messages.booster.list-item", BOOSTERLI);
     }
 
 }

@@ -2,7 +2,6 @@ package com.alttd.vboosters.data;
 
 import com.alttd.boosterapi.config.ServerConfig;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import net.kyori.adventure.text.Component;
 
 import java.util.UUID;
 
@@ -32,7 +31,4 @@ public class ServerWrapper {
         return useBoosters;
     }
 
-    public void sendBoosterUpdate(UUID boosterUUID, boolean active) {
-
-    }
 }

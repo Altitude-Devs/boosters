@@ -1,44 +1,35 @@
 package com.alttd.vboosters.data;
 
-import com.alttd.boosterapi.Booster;
-import com.alttd.boosterapi.BoosterType;
+import com.alttd.boosterapi.booster.Booster;
+import com.alttd.boosterapi.booster.BoosterState;
+import com.alttd.boosterapi.booster.BoosterType;
+import com.alttd.boosterapi.database.Queries;
 
 import java.util.UUID;
 
 public class VelocityBooster implements Booster {
 
-    private UUID uuid;
-    private String activator;
+    private final UUID uuid;
+    private final String reason;
     private Long startingTime;
     private long duration;
-    private BoosterType boosterType;
-    private Integer multiplier;
-    private Boolean active;
-    private Boolean finished;
+    private final BoosterType boosterType;
+    private BoosterState boosterState;
+    private final Integer multiplier;
 
-    public VelocityBooster(UUID uuid, BoosterType boosterType, String reason, long duration, int multiplier) {
+    public VelocityBooster(UUID uuid, BoosterType boosterType, BoosterState boosterState , String reason, long duration, int multiplier) {
         this.uuid = uuid;
         this.boosterType = boosterType;
-        this.activator = reason;
+        this.boosterState = boosterState;
+        this.reason = reason;
         this.duration = duration;
         this.multiplier = multiplier;
-        this.active = false;
-        this.finished = false;
-        saveBooster();
-    }
-
-    public VelocityBooster(BoosterType type, String playerName, long duration, int multiplier) {
-        this(UUID.randomUUID(), type, playerName, duration, multiplier);
+        this.saveBooster();
     }
 
     @Override
     public boolean isActive() {
-        return active;
-    }
-
-    @Override
-    public void setActive(Boolean active) {
-        this.active = active;
+        return boosterState == BoosterState.ACTIVE;
     }
 
     @Override
@@ -47,18 +38,18 @@ public class VelocityBooster implements Booster {
     }
 
     @Override
-    public void setType(BoosterType boosterType) {
-        this.boosterType = boosterType;
+    public BoosterState getState() {
+        return boosterState;
+    }
+
+    @Override
+    public void updateState(BoosterState state) {
+        this.boosterState = state;
     }
 
     @Override
     public int getMultiplier() {
         return multiplier;
-    }
-
-    @Override
-    public void setMultiplier(int multiplier) {
-        this.multiplier = multiplier;
     }
 
     @Override
@@ -77,23 +68,27 @@ public class VelocityBooster implements Booster {
     }
 
     @Override
+    public String getTimeDuration() {
+        long second = (duration / 1000) % 60;
+        long minute = (duration / (1000 * 60)) % 60;
+        long hour = (duration / (1000 * 60 * 60)) % 24;
+        long day = (duration / (1000 * 60 * 60 * 24));
+        return String.format("%02d:%02d:%02d:%02d", day, hour, minute, second);
+    }
+
+    @Override
     public void setDuration(long duration) {
         this.duration = duration;
     }
 
     @Override
     public String getActivator() {
-        return activator;
-    }
-
-    @Override
-    public void setActivator(String activationReason) {
-        this.activator = activationReason;
+        return reason;
     }
 
     @Override
     public long getTimeRemaining() {
-        if(active) {
+        if(boosterState == BoosterState.ACTIVE) {
             return startingTime + duration - System.currentTimeMillis();
         }
         return duration;
@@ -105,25 +100,12 @@ public class VelocityBooster implements Booster {
     }
 
     @Override
-    public void stopBooster() {
-        setDuration(getTimeRemaining());
-        setActive(false);
-        saveBooster();
-    }
-
-    @Override
     public void saveBooster() {
-        // logic to save to yaml or to db
-    }
-
-    public void finish() {
-        finished = true;
-        stopBooster();
+        Queries.saveBooster(this);
     }
 
     @Override
-    public boolean finished() {
-        return finished;
+    public String toString() {
+        return "BoosterType: " + boosterType + ", reason: " + reason + ", duration: " + getTimeRemaining() + ", Level: " + multiplier + ", Startingtime " + startingTime + ", duration " + duration + ", end time: " + System.currentTimeMillis();
     }
-
 }

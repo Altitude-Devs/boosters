@@ -1,46 +1,47 @@
 package com.alttd.boosters.data;
 
+import com.alttd.boosterapi.booster.BoosterState;
 import com.alttd.boosterapi.booster.BoosterType;
-import com.alttd.boosterapi.config.BoosterConfig;
+import com.alttd.boosterapi.config.Config;
+import com.alttd.boosterapi.util.Utils;
+import net.kyori.adventure.text.minimessage.Template;
+import org.bukkit.Bukkit;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
-public class Booster implements com.alttd.boosterapi.booster.Booster {
+public class IBooster implements com.alttd.boosterapi.booster.Booster {
 
-    private UUID uuid;
-    private String reason;
+    private final UUID uuid;
+    private final String reason;
     private Long startingTime;
     private long duration;
-    private BoosterType boosterType;
-    private Integer multiplier;
-    private Boolean active;
-    private Boolean finished;
+    private final BoosterType boosterType;
+    private BoosterState boosterState;
+    private final Integer multiplier;
 
-    public Booster(BoosterConfig boosterConfig) {
-        this.uuid = boosterConfig.getUuid();
-        this.boosterType = boosterConfig.getBoosterType();
-        this.reason = boosterConfig.getReason();
-        this.duration = boosterConfig.getDuration();
-        this.multiplier = boosterConfig.getLevel();
-        this.active = false;
-        this.finished = boosterConfig.isFinished();
-    }
-
-    public Booster(UUID uuid, BoosterType boosterType, String reason, long duration, int multiplier) {
+    public IBooster(UUID uuid, BoosterType boosterType, BoosterState boosterState , String reason, long duration, int multiplier) {
         this.uuid = uuid;
         this.boosterType = boosterType;
+        this.boosterState = boosterState;
         this.reason = reason;
         this.duration = duration;
         this.multiplier = multiplier;
-        this.active = false;
-        this.finished = false;
+
+        if (getType() == null || getActivator() == null || getDuration() == null) return;
+        List<Template> templates = new ArrayList<>(List.of(
+                Template.template("type", getType().getBoosterName()),
+                Template.template("reason", getActivator()),
+                Template.template("duration", getTimeDuration()), // TODO add formatted time string
+                Template.template("multiplier", getMultiplier()+"")));
+        Bukkit.broadcast(Utils.parseMiniMessage(Config.STARTBOOSTER, templates));
     }
 
     @Override
     public boolean isActive() {
-        return active;
+        return boosterState == BoosterState.ACTIVE;
     }
-
 
     @Override
     public BoosterType getType() {
@@ -48,18 +49,18 @@ public class Booster implements com.alttd.boosterapi.booster.Booster {
     }
 
     @Override
-    public void setType(BoosterType boosterType) {
-        this.boosterType = boosterType;
+    public BoosterState getState() {
+        return this.boosterState;
+    }
+
+    @Override
+    public void updateState(BoosterState state) {
+        this.boosterState = state;
     }
 
     @Override
     public int getMultiplier() {
         return multiplier;
-    }
-
-    @Override
-    public void setMultiplier(int multiplier) {
-        this.multiplier = multiplier;
     }
 
     @Override
@@ -79,10 +80,11 @@ public class Booster implements com.alttd.boosterapi.booster.Booster {
 
     @Override
     public String getTimeDuration() {
-        long second = (getTimeRemaining() / 1000) % 60;
-        long minute = (getTimeRemaining() / (1000 * 60)) % 60;
-        long hour = (getTimeRemaining() / (1000 * 60 * 60)) % 24;
-        return String.format("%02d:%02d:%02d", hour, minute, second);
+        long second = (duration / 1000) % 60;
+        long minute = (duration / (1000 * 60)) % 60;
+        long hour = (duration / (1000 * 60 * 60)) % 24;
+        long day = (duration / (1000 * 60 * 60 * 24));
+        return String.format("%02d:%02d:%02d:%02d", day, hour, minute, second);
     }
 
     @Override
@@ -96,13 +98,8 @@ public class Booster implements com.alttd.boosterapi.booster.Booster {
     }
 
     @Override
-    public void setActivator(String activationReason) {
-        this.reason = activationReason;
-    }
-
-    @Override
     public long getTimeRemaining() {
-        if(active) {
+        if(boosterState == BoosterState.ACTIVE) {
             return startingTime + duration - System.currentTimeMillis();
         }
         return duration;
@@ -111,6 +108,11 @@ public class Booster implements com.alttd.boosterapi.booster.Booster {
     @Override
     public UUID getUUID() {
         return uuid;
+    }
+
+    @Override
+    public void saveBooster() {
+        // Obsolete, we handle saving on proxy
     }
 
 

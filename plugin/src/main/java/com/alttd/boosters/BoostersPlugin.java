@@ -3,6 +3,8 @@ package com.alttd.boosters;
 import com.alttd.boosterapi.BoosterAPI;
 import com.alttd.boosterapi.BoosterImplementation;
 import com.alttd.boosterapi.config.Config;
+import com.alttd.boosterapi.util.ALogger;
+import com.alttd.boosters.commands.BoosterList;
 import com.alttd.boosters.listeners.MCmmoListener;
 import com.alttd.boosters.listeners.MyPetListener;
 import com.alttd.boosters.listeners.PhantomSpawnListener;
@@ -21,6 +23,7 @@ public final class BoostersPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
+        ALogger.init(getSLF4JLogger());
         boosterAPI = new BoosterImplementation();
         boosterManager = new BoosterManager();
 
@@ -33,6 +36,7 @@ public final class BoostersPlugin extends JavaPlugin {
         }
 
         registerListener(new PhantomSpawnListener());
+        registerCommand("boosterlist", new BoosterList());
 
         getServer().getMessenger().registerOutgoingPluginChannel(this, Config.pluginMessageChannel);
         getServer().getMessenger().registerIncomingPluginChannel(this, Config.pluginMessageChannel, new PluginMessage());

@@ -6,7 +6,6 @@ import net.kyori.adventure.text.minimessage.Template;
 import net.kyori.adventure.text.minimessage.template.TemplateResolver;
 
 import java.util.List;
-import java.util.Locale;
 
 public class Utils {
 

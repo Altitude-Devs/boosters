@@ -61,6 +61,7 @@ public class BoosterCommand {
                     for (Booster booster : VelocityBoosterStorage.getVelocityBoosterStorage().getBoosters().values()) {
                         long expiryTime = new Date().getTime() + booster.getDuration();
                         ArrayList<Template> templates = new ArrayList<>(List.of(
+                                Template.of("type", booster.getType().getBoosterName()),
                                 Template.of("activator", booster.getActivator()),
                                 Template.of("start_time", DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(booster.getStartingTime())),
                                 Template.of("duration", String.valueOf(booster.getDuration())),

@@ -2,11 +2,7 @@ package com.alttd.vboosters;
 
 import com.alttd.boosterapi.BoosterAPI;
 import com.alttd.boosterapi.BoosterImplementation;
-import com.alttd.boosterapi.config.Config;
-import com.alttd.boosterapi.config.ServerConfig;
 import com.alttd.boosterapi.util.ALogger;
-import com.alttd.proxydiscordlink.DiscordLink;
-import com.alttd.proxydiscordlink.bot.api.DiscordSendMessage;
 import com.alttd.vboosters.commands.BoosterCommand;
 import com.alttd.vboosters.commands.DonorRankCommand;
 import com.alttd.vboosters.listeners.PluginMessageListener;

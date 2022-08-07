@@ -24,7 +24,7 @@ public final class BoostersPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        ALogger.init(Bukkit.getLogger());
+        ALogger.init(getSLF4JLogger());
         boosterAPI = new BoosterImplementation();
         boosterManager = new BoosterManager();
 

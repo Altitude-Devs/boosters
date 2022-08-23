@@ -29,6 +29,7 @@ import net.kyori.adventure.text.minimessage.Template;
 import java.text.DateFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class BoosterCommand {
@@ -72,7 +73,7 @@ public class BoosterCommand {
                             templates.add(Template.of("end_time", "unknown"));
                         if (booster.isActive())
                             activeBoosterComponents.add(miniMessage.parse(activeBooster, templates));
-                        else
+                        else if (!booster.finished())
                             queuedBoosterComponents.add(miniMessage.parse(queuedBooster, templates));
                     }
                     Component separator = miniMessage.parse("\n");
@@ -100,7 +101,7 @@ public class BoosterCommand {
                                             .executes(context -> { //TODO make messages configurable
                                                 String username = context.getArgument("username", String.class);
                                                 BoosterType boosterType = BoosterType.getByName(context.getArgument("booster", String.class));
-                                                long duration = context.getArgument("time", Integer.class) * 60;
+                                                long duration = TimeUnit.MINUTES.toMillis(context.getArgument("time", Integer.class));
                                                 double multiplier = context.getArgument("multiplier", Double.class);
                                                 VelocityBoosters.getPlugin().getBoosterManager().addBooster(new VelocityBooster(boosterType, username, duration, multiplier));
                                                 long expiryTime = new Date().getTime() + duration;

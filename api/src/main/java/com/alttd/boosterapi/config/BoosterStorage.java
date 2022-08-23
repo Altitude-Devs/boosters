@@ -1,6 +1,7 @@
 package com.alttd.boosterapi.config;
 
 import com.alttd.boosterapi.Booster;
+import com.alttd.boosterapi.BoosterType;
 import com.alttd.boosterapi.util.ALogger;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonFactory;
@@ -12,6 +13,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class BoosterStorage {
 
@@ -21,6 +23,11 @@ public abstract class BoosterStorage {
         ALogger.info("Loading boosters...");
         init();
         boosters = loadBoosters();
+        if (Config.DEBUG) {
+            for (Booster value : boosters.values()) {
+                ALogger.info(value.getType().BoosterName);
+            }
+        }
     }
     private void init() {
         File CONFIG_PATH = new File(System.getProperty("user.home") + File.separator + "share" + File.separator + "configs" + File.separator + "Boosters");
@@ -87,6 +94,8 @@ public abstract class BoosterStorage {
         try {
             JsonGenerator generator = new JsonFactory().createGenerator(CONFIG_FILE, JsonEncoding.UTF8);
             for (Booster booster : boosters) {
+                if (booster.finished())
+                    continue;
                 saveBooster(booster, generator);
             }
             generator.close();
@@ -110,4 +119,7 @@ public abstract class BoosterStorage {
         generator.writeEndObject();
     }
 
+    public Collection<Booster> getBoosters(BoosterType type) {
+        return boosters.values().stream().filter(booster -> booster.getType().equals(type)).collect(Collectors.toList());
+    }
 }

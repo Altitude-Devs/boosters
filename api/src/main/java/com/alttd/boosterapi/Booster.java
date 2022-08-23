@@ -2,7 +2,7 @@ package com.alttd.boosterapi;
 
 import java.util.UUID;
 
-public interface Booster {
+public interface Booster extends Comparable {
 
     boolean isActive();
 
@@ -19,6 +19,8 @@ public interface Booster {
     Long getStartingTime();
 
     void setStartingTime(long startingTime);
+
+    Long getEndTime();
 
     Long getDuration();
 

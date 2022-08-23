@@ -4,6 +4,7 @@ import com.alttd.boosterapi.Booster;
 import com.alttd.boosterapi.BoosterType;
 import com.alttd.boosterapi.config.BoosterStorage;
 import com.alttd.boosterapi.util.ALogger;
+import com.alttd.boosters.data.ServerBooster;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 
@@ -77,7 +78,7 @@ public class ServerBoosterStorage extends BoosterStorage {
             return error("Didn't find finished at expected location");
         parser.nextValue();
         boolean finished = parser.getValueAsBoolean();
-        return new com.alttd.boosters.data.Booster(uuid, activator, boosterType, startingTime, duration, multiplier, active, finished);
+        return new ServerBooster(uuid, activator, boosterType, startingTime, duration, multiplier, active, finished);
     }
 
     private static Booster error(String error) {

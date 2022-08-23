@@ -2,12 +2,18 @@ package com.alttd.vboosters.data;
 
 import com.alttd.boosterapi.Booster;
 import com.alttd.boosterapi.BoosterType;
+import com.alttd.vboosters.VelocityBoosters;
 import com.alttd.vboosters.storage.VelocityBoosterStorage;
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
+import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Date;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class VelocityBooster implements Booster {
 
@@ -89,6 +95,11 @@ public class VelocityBooster implements Booster {
     }
 
     @Override
+    public Long getEndTime() {
+        return startingTime + duration;
+    }
+
+    @Override
     public Long getDuration() {
         return duration;
     }
@@ -127,7 +138,11 @@ public class VelocityBooster implements Booster {
         setActive(false);
         saveBooster();
         if (!finished) {
-            //TODO send plugin message that its stopped
+            ByteArrayDataOutput out = ByteStreams.newDataOutput();
+            out.writeUTF("finish");
+            out.writeUTF(uuid.toString());
+            VelocityBoosters.getPlugin().getProxy().getAllServers()
+                    .forEach(registeredServer -> registeredServer.sendPluginMessage(VelocityBoosters.getPlugin().getChannelIdentifier(), out.toByteArray()));
         }
     }
 
@@ -136,11 +151,27 @@ public class VelocityBooster implements Booster {
         VelocityBoosterStorage vbs = VelocityBoosterStorage.getVelocityBoosterStorage();
         vbs.getBoosters().put(uuid, this);
         vbs.saveBoosters(vbs.getBoosters().values());
+        updateQueue();
+        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+        out.writeUTF("reload");
+        VelocityBoosters.getPlugin().getProxy().getAllServers()
+                .forEach(registeredServer -> registeredServer.sendPluginMessage(VelocityBoosters.getPlugin().getChannelIdentifier(), out.toByteArray()));
     }
 
     public void finish() { //TODO finish it on the servers as well
         finished = true;
         stopBooster();
+        saveBooster(); //Deletes inactive boosters
+        List<Booster> collect = VelocityBoosterStorage.getVelocityBoosterStorage().getBoosters(boosterType).stream().sorted().collect(Collectors.toList());
+        if (collect.size() <= 1)
+            return;
+        Booster booster = collect.get(1);
+        booster.setActive(true);
+        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+        out.writeUTF("activate");
+        out.writeUTF(booster.getUUID().toString());
+        VelocityBoosters.getPlugin().getProxy().getAllServers()
+                .forEach(registeredServer -> registeredServer.sendPluginMessage(VelocityBoosters.getPlugin().getChannelIdentifier(), out.toByteArray()));
         //TODO send plugin message that this is finished
     }
 
@@ -149,4 +180,38 @@ public class VelocityBooster implements Booster {
         return finished;
     }
 
+    private void updateQueue() {
+        Collection<Booster> boosters = VelocityBoosterStorage.getVelocityBoosterStorage().getBoosters(getType());
+        if (boosters.isEmpty())
+            return;
+        List<Booster> collect = boosters.stream().sorted().collect(Collectors.toList());
+        Booster booster = collect.get(0);
+        if (!booster.isActive()) {
+            booster.setActive(true);
+            booster.setStartingTime(new Date().getTime());
+        }
+        if (collect.size() > 1)
+            fixTimes(collect);
+    }
+
+    private void fixTimes(List<Booster> sorted) {
+        for (int i = 0; i < sorted.size() - 1; i++) {
+            Booster booster = sorted.get(i + 1);
+            if (booster.isActive()) { //Disable active boosters that shouldn't be active and update their duration
+                booster.setActive(false);
+                booster.setDuration(booster.getEndTime() - booster.getStartingTime());
+            }
+            booster.setStartingTime(sorted.get(i).getEndTime());
+        }
+    }
+
+    @Override
+    public int compareTo(@NotNull Object o) {
+        Booster booster = (Booster) o;
+        if (booster.getMultiplier() < getMultiplier())
+            return -1;
+        if (booster.getMultiplier() > getMultiplier())
+            return 1;
+        return booster.isActive() ? 1 : -1;
+    }
 }

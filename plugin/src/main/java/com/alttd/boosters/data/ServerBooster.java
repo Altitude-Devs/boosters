@@ -1,11 +1,13 @@
 package com.alttd.boosters.data;
 
+import com.alttd.boosterapi.Booster;
 import com.alttd.boosterapi.BoosterType;
 import com.alttd.boosterapi.util.ALogger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class Booster implements com.alttd.boosterapi.Booster {
+public class ServerBooster implements Booster {
 
     private UUID uuid;
     private String activator;
@@ -16,7 +18,7 @@ public class Booster implements com.alttd.boosterapi.Booster {
     private Boolean active;
     private Boolean finished;
 
-    public Booster(UUID uuid, BoosterType boosterType, String reason, long duration, double multiplier) {
+    public ServerBooster(UUID uuid, BoosterType boosterType, String reason, long duration, double multiplier) {
         this.uuid = uuid;
         this.boosterType = boosterType;
         this.activator = reason;
@@ -26,11 +28,11 @@ public class Booster implements com.alttd.boosterapi.Booster {
         this.finished = false;
     }
 
-    public Booster(BoosterType type, String playerName, long duration, double multiplier) {
+    public ServerBooster(BoosterType type, String playerName, long duration, double multiplier) {
         this(UUID.randomUUID(), type, playerName, duration, multiplier);
     }
 
-    public Booster(UUID uuid, String activator, BoosterType boosterType, long startingTime, long duration, double multiplier, boolean active, boolean finished) {
+    public ServerBooster(UUID uuid, String activator, BoosterType boosterType, long startingTime, long duration, double multiplier, boolean active, boolean finished) {
         this.uuid = uuid;
         this.activator = activator;
         this.boosterType = boosterType;
@@ -79,6 +81,11 @@ public class Booster implements com.alttd.boosterapi.Booster {
     @Override
     public void setStartingTime(long startingTime) {
         this.startingTime = startingTime;
+    }
+
+    @Override
+    public Long getEndTime() {
+        return startingTime = duration;
     }
 
     @Override
@@ -137,5 +144,13 @@ public class Booster implements com.alttd.boosterapi.Booster {
     }
 
 
-
+    @Override
+    public int compareTo(@NotNull Object o) {
+        Booster booster = (Booster) o;
+        if (booster.getMultiplier() < getMultiplier())
+            return -1;
+        if (booster.getMultiplier() > getMultiplier())
+            return 1;
+        return booster.isActive() ? 1 : -1;
+    }
 }

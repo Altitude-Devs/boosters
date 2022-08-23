@@ -18,12 +18,19 @@ public class PluginMessage implements PluginMessageListener {
         if(!channel.equals(Config.pluginMessageChannel)) return;
         ByteArrayDataInput in = ByteStreams.newDataInput(bytes);
         String subChannel = in.readUTF();
-        // Listen to plugin messages from velocity to either activate or deactive a booster.
         switch (subChannel) {
             case "activate" -> {
-                ServerBoosterStorage.getServerBoosterStorage().reload();
-                //TODO maybe make this add one thing to the map without resetting it to avoid having to clear it
-                // (still need to load it all to get that one booster though)
+                UUID uuid = UUID.fromString(in.readUTF());
+                Booster booster = ServerBoosterStorage.getServerBoosterStorage().getBoosters().get(uuid);
+                if (booster == null) {
+                    ServerBoosterStorage.getServerBoosterStorage().reload();
+                    booster = ServerBoosterStorage.getServerBoosterStorage().getBoosters().get(uuid);
+                }
+                if (booster == null) {
+                    ALogger.warn("Unable to load and activate booster [" + uuid + "]");
+                    break;
+                }
+                booster.setActive(true);
             }
             case "finish" -> {
                 UUID uuid = UUID.fromString(in.readUTF());
@@ -42,6 +49,9 @@ public class PluginMessage implements PluginMessageListener {
                     break;
                 }
                 booster.stopBooster();
+            }
+            case "reload" -> {
+                ServerBoosterStorage.getServerBoosterStorage().reload();
             }
             default -> {}
         }

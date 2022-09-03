@@ -7,6 +7,7 @@ import com.alttd.boosterapi.util.Utils;
 import com.alttd.proxydiscordlink.bot.api.DiscordSendMessage;
 import com.alttd.vboosters.VelocityBoosters;
 import com.alttd.vboosters.data.VelocityBooster;
+import com.alttd.vboosters.managers.BoosterManager;
 import com.alttd.vboosters.storage.VelocityBoosterStorage;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -103,14 +104,14 @@ public class BoosterCommand {
                                                 BoosterType boosterType = BoosterType.getByName(context.getArgument("booster", String.class));
                                                 long duration = TimeUnit.MINUTES.toMillis(context.getArgument("time", Integer.class));
                                                 double multiplier = context.getArgument("multiplier", Double.class);
-                                                VelocityBoosters.getPlugin().getBoosterManager().addBooster(new VelocityBooster(boosterType, username, duration, multiplier));
-                                                long expiryTime = new Date().getTime() + duration;
-                                                String msg = "[" + username + "] activated booster of type [" + Utils.capitalize(boosterType.getBoosterName()) + "] until %date%."; //TODO check if there was a booster active already and change message based on that
-                                                DiscordSendMessage.sendEmbed(Config.BOOST_ANNOUNCE_CHANNEL, "Booster Activated", msg.replaceAll("%date%", "<t:" + expiryTime + ":f>"));
-                                                String mcMessage = msg.replaceAll("%date%", DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(expiryTime));
-                                                mcMessage += " [UTC]";
-                                                VelocityBoosters.getPlugin().getProxy().sendMessage(MiniMessage.markdown().parse(mcMessage));
-                                                VelocityBoosters.getPlugin().getLogger().info(mcMessage);
+                                                if (boosterType.equals(BoosterType.MCMMO))
+                                                    addAllMcMMOBoosters(username, duration, multiplier);
+                                                else
+                                                    VelocityBoosters.getPlugin().getBoosterManager().addBooster(new VelocityBooster(boosterType, username, duration, multiplier));
+                                                String msg = "[" + username + "] purchased booster of type [" + Utils.capitalize(boosterType.getBoosterName()) + "]"; //TODO check if there was a booster active already and change message based on that
+                                                DiscordSendMessage.sendEmbed(Config.BOOST_ANNOUNCE_CHANNEL, "Booster Purchased", msg);
+                                                VelocityBoosters.getPlugin().getProxy().sendMessage(MiniMessage.markdown().parse(msg));
+                                                VelocityBoosters.getPlugin().getLogger().info(msg);
                                                 return 1;
                                             })
                                         )
@@ -127,5 +128,12 @@ public class BoosterCommand {
         CommandMeta meta = metaBuilder.build();
 
         proxyServer.getCommandManager().register(meta, brigadierCommand);
+    }
+
+    private void addAllMcMMOBoosters(String username, long duration, double multiplier) {
+        BoosterManager boosterManager = VelocityBoosters.getPlugin().getBoosterManager();
+        for (BoosterType boosterType : BoosterType.getAllMcMMOBoosters()) {
+            boosterManager.addBooster(new VelocityBooster(boosterType, username, duration, multiplier));
+        }
     }
 }

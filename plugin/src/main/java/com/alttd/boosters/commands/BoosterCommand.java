@@ -21,7 +21,7 @@ public class BoosterCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
-        if (!commandSender.hasPermission("command.proxy.booster")) {
+        if (!commandSender.hasPermission("boosters.list")) {
             commandSender.sendMiniMessage("<red>You don't have permission for this command", null);
             return true;
         }

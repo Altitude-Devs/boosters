@@ -40,7 +40,7 @@ public final class BoostersPlugin extends JavaPlugin {
 
         getServer().getMessenger().registerOutgoingPluginChannel(this, Config.pluginMessageChannel);
         getServer().getMessenger().registerIncomingPluginChannel(this, Config.pluginMessageChannel, new PluginMessage());
-        registerCommand("boosters", new BoosterCommand());
+        registerCommand("listboosters", new BoosterCommand());
         ServerBoosterStorage.getServerBoosterStorage(); //this loads the boosters in
     }
 

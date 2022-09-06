@@ -1,5 +1,7 @@
 package com.alttd.boosterapi;
 
+import java.util.List;
+
 public enum BoosterType {
 
     /**
@@ -65,6 +67,24 @@ public enum BoosterType {
             }
         }
         return UNKNOWN;
+    }
+
+    public static List<BoosterType> getAllMcMMOBoosters() {
+        return List.of(BoosterType.ACROBATICS,
+                BoosterType.ALCHEMY,
+                BoosterType.ARCHERY,
+                BoosterType.AXES,
+                BoosterType.EXCAVATION,
+                BoosterType.FISHING,
+                BoosterType.HERBALISM,
+                BoosterType.MINING,
+                BoosterType.REPAIR,
+                BoosterType.SALVAGE,
+                BoosterType.SMELTING,
+                BoosterType.SWORDS,
+                BoosterType.TAMING,
+                BoosterType.UNARMED,
+                BoosterType.WOODCUTTING);
     }
 
 }

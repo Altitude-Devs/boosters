@@ -41,4 +41,11 @@ bukkit {
     apiVersion = "1.18"
     authors = listOf("destro174")
     softDepend = listOf("MyPet", "mcMMO")
+    commands {
+        register("listboosters") {
+            description = "Lists all active and queued boosters"
+            permission = "boosters.list"
+            usage = "/listboosters"
+        }
+    }
 }

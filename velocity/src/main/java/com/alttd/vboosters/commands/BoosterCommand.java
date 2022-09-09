@@ -5,6 +5,7 @@ import com.alttd.boosterapi.BoosterType;
 import com.alttd.boosterapi.config.Config;
 import com.alttd.boosterapi.util.Utils;
 import com.alttd.proxydiscordlink.bot.api.DiscordSendMessage;
+import com.alttd.proxydiscordlink.lib.net.dv8tion.jda.api.entities.templates.Template;
 import com.alttd.vboosters.VelocityBoosters;
 import com.alttd.vboosters.data.VelocityBooster;
 import com.alttd.vboosters.managers.BoosterManager;
@@ -24,8 +25,10 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.util.GameProfile;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.Template;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 
 import java.text.DateFormat;
 import java.util.*;
@@ -49,7 +52,7 @@ public class BoosterCommand {
         return builder.buildFuture();
     }
 
-    private static MiniMessage miniMessage = MiniMessage.get();
+    private static MiniMessage miniMessage = MiniMessage.miniMessage();
     public BoosterCommand(ProxyServer proxyServer) {
         LiteralCommandNode<CommandSource> command = LiteralArgumentBuilder
                 .<CommandSource>literal("booster")
@@ -62,25 +65,30 @@ public class BoosterCommand {
                     List<Component> queuedBoosterComponents = new ArrayList<>();
                     for (Booster booster : VelocityBoosterStorage.getVelocityBoosterStorage().getBoosters().values()) {
                         long expiryTime = new Date().getTime() + booster.getDuration();
-                        ArrayList<Template> templates = new ArrayList<>(List.of(
-                                Template.of("type", booster.getType().getBoosterName()),
-                                Template.of("activator", booster.getActivator()),
-                                Template.of("start_time", DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(booster.getStartingTime())),
-                                Template.of("duration", String.valueOf(booster.getDuration())),
-                                Template.of("multiplier", String.valueOf(booster.getMultiplier()))));
+                        TagResolver.Builder tagResolver = TagResolver.builder();
+
+                        List<TagResolver> templates = List.of(
+                                Placeholder.unparsed("type", booster.getType().getBoosterName()),
+                                Placeholder.unparsed("activator", booster.getActivator()),
+                                Placeholder.unparsed("start_time", DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(booster.getStartingTime())),
+                                Placeholder.unparsed("duration", String.valueOf(booster.getDuration())),
+                                Placeholder.unparsed("multiplier", String.valueOf(booster.getMultiplier())));
+                        for (TagResolver tagResolver1 : templates)
+                            tagResolver.resolver(tagResolver1); // cheaty and lazy way I know
+
                         if (booster.isActive())
-                            templates.add(Template.of("end_time", DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(expiryTime)));
+                            tagResolver.resolver(Placeholder.unparsed("end_time", DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(expiryTime)));
                         else
-                            templates.add(Template.of("end_time", "unknown"));
+                            tagResolver.resolver(Placeholder.unparsed("end_time", "unknown"));
                         if (booster.isActive())
-                            activeBoosterComponents.add(miniMessage.parse(activeBooster, templates));
+                            activeBoosterComponents.add(miniMessage.deserialize(activeBooster, tagResolver.build()));
                         else if (!booster.finished())
-                            queuedBoosterComponents.add(miniMessage.parse(queuedBooster, templates));
+                            queuedBoosterComponents.add(miniMessage.deserialize(queuedBooster, tagResolver.build()));
                     }
-                    Component separator = miniMessage.parse("\n");
-                    context.getSource().sendMessage(miniMessage.parse(message, List.of(
-                            Template.of("active_boosters", Component.join(separator, activeBoosterComponents)),
-                            Template.of("queued_boosters", Component.join(separator, queuedBoosterComponents))
+                    Component separator = miniMessage.deserialize("\n");
+                    context.getSource().sendMessage(miniMessage.deserialize(message,TagResolver.resolver(
+                            Placeholder.component("active_boosters", Component.join(JoinConfiguration.separator(separator), activeBoosterComponents)),
+                            Placeholder.component("queued_boosters", Component.join(JoinConfiguration.separator(separator), queuedBoosterComponents))
                     )));
                     return 1;
                 })
@@ -110,7 +118,7 @@ public class BoosterCommand {
                                                     VelocityBoosters.getPlugin().getBoosterManager().addBooster(new VelocityBooster(boosterType, username, duration, multiplier));
                                                 String msg = "[" + username + "] purchased booster of type [" + Utils.capitalize(boosterType.getBoosterName()) + "]"; //TODO check if there was a booster active already and change message based on that
                                                 DiscordSendMessage.sendEmbed(Config.BOOST_ANNOUNCE_CHANNEL, "Booster Purchased", msg);
-                                                VelocityBoosters.getPlugin().getProxy().sendMessage(MiniMessage.markdown().parse(msg));
+                                                VelocityBoosters.getPlugin().getProxy().sendMessage(MiniMessage.miniMessage().deserialize(msg));
                                                 VelocityBoosters.getPlugin().getLogger().info(msg);
                                                 return 1;
                                             })

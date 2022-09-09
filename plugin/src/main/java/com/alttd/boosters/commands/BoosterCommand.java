@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.text.DateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class BoosterCommand implements CommandExecutor {
 
@@ -36,7 +37,7 @@ public class BoosterCommand implements CommandExecutor {
                     Placeholder.unparsed("type", booster.getType().getBoosterName()),
                     Placeholder.unparsed("activator", booster.getActivator()),
                     Placeholder.unparsed("start_time", DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(booster.getStartingTime())),
-                    Placeholder.unparsed("duration", String.valueOf(booster.getDuration())),
+                    Placeholder.unparsed("duration", TimeUnit.MILLISECONDS.toHours(booster.getDuration()) + " hours"),
                     Placeholder.unparsed("multiplier", String.valueOf(booster.getMultiplier())),
                     Placeholder.unparsed("end_time", booster.isActive() ? DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(expiryTime) : "unknown")
                     );

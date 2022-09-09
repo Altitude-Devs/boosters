@@ -72,6 +72,8 @@ public abstract class BoosterStorage {
                 Booster booster = loadBooster(parser);
                 if (Config.DEBUG)
                     ALogger.info("Loading booster [" + booster.getType() + "] activated by [" + booster.getActivator()+ "].");
+                if (new Date(booster.getEndTime()).after(new Date()))
+                    continue;
                 boosters.put(booster.getUUID(), booster);
                 if (parser.nextToken() != null && !parser.currentToken().isStructEnd()) {
                     ALogger.warn("Last loaded booster had more data than expected, skipping it...");
@@ -84,7 +86,7 @@ public abstract class BoosterStorage {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
+        saveBoosters(boosters.values());
         return boosters;
     }
 
@@ -93,8 +95,9 @@ public abstract class BoosterStorage {
     public void saveBoosters(Collection<Booster> boosters) {
         try {
             JsonGenerator generator = new JsonFactory().createGenerator(CONFIG_FILE, JsonEncoding.UTF8);
+            Date date = new Date();
             for (Booster booster : boosters) {
-                if (booster.finished())
+                if (booster.finished() || new Date(booster.getEndTime()).after(date))
                     continue;
                 saveBooster(booster, generator);
             }

@@ -17,7 +17,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.command.CommandSource;
@@ -25,7 +24,6 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.util.GameProfile;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -71,24 +69,24 @@ public class BoosterCommand {
                                 Placeholder.unparsed("type", booster.getType().getBoosterName()),
                                 Placeholder.unparsed("activator", booster.getActivator()),
                                 Placeholder.unparsed("start_time", DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(booster.getStartingTime())),
-                                Placeholder.unparsed("duration", String.valueOf(booster.getDuration())),
+                                Placeholder.unparsed("duration", TimeUnit.MILLISECONDS.toHours(booster.getDuration()) + " hours"),
                                 Placeholder.unparsed("multiplier", String.valueOf(booster.getMultiplier())));
                         for (TagResolver tagResolver1 : templates)
                             tagResolver.resolver(tagResolver1); // cheaty and lazy way I know
 
                         if (booster.isActive())
-                            tagResolver.resolver(Placeholder.unparsed("end_time", DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(expiryTime)));
+                            templates.add(Template.of("end_time", DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(expiryTime)));
                         else
-                            tagResolver.resolver(Placeholder.unparsed("end_time", "unknown"));
+                            templates.add(Template.of("end_time", "unknown"));
                         if (booster.isActive())
-                            activeBoosterComponents.add(miniMessage.deserialize(activeBooster, tagResolver.build()));
+                            activeBoosterComponents.add(miniMessage.parse(activeBooster, templates));
                         else if (!booster.finished())
-                            queuedBoosterComponents.add(miniMessage.deserialize(queuedBooster, tagResolver.build()));
+                            queuedBoosterComponents.add(miniMessage.parse(queuedBooster, templates));
                     }
-                    Component separator = miniMessage.deserialize("\n");
-                    context.getSource().sendMessage(miniMessage.deserialize(message,TagResolver.resolver(
-                            Placeholder.component("active_boosters", Component.join(JoinConfiguration.separator(separator), activeBoosterComponents)),
-                            Placeholder.component("queued_boosters", Component.join(JoinConfiguration.separator(separator), queuedBoosterComponents))
+                    Component separator = miniMessage.parse("\n");
+                    context.getSource().sendMessage(miniMessage.parse(message, List.of(
+                            Template.of("active_boosters", Component.join(separator, activeBoosterComponents)),
+                            Template.of("queued_boosters", Component.join(separator, queuedBoosterComponents))
                     )));
                     return 1;
                 })

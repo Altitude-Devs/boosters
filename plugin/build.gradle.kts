@@ -12,9 +12,8 @@ dependencies {
     // MyPet
     compileOnly("de.keyle:mypet:3.12-SNAPSHOT")
     // mcMMO
-    compileOnly("com.gmail.nossr50.mcMMO:mcMMO:2.1.206")
-    compileOnly("com.sk89q.worldguard:worldguard-core:7.0.4") {
-        exclude("com.google.code.findbugs")
+    compileOnly("com.gmail.nossr50.mcMMO:mcMMO:2.1.206") {
+        exclude("com.sk89q.worldguard")
     }
 
     //Jackson (json)

@@ -17,6 +17,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.command.CommandSource;
@@ -24,6 +25,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.util.GameProfile;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -65,28 +67,31 @@ public class BoosterCommand {
                         long expiryTime = new Date().getTime() + booster.getDuration();
                         TagResolver.Builder tagResolver = TagResolver.builder();
 
-                        List<TagResolver> templates = List.of(
+                        List<TagResolver> templates = new ArrayList<>(List.of(
                                 Placeholder.unparsed("type", booster.getType().getBoosterName()),
                                 Placeholder.unparsed("activator", booster.getActivator()),
                                 Placeholder.unparsed("start_time", DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(booster.getStartingTime())),
                                 Placeholder.unparsed("duration", TimeUnit.MILLISECONDS.toHours(booster.getDuration()) + " hours"),
-                                Placeholder.unparsed("multiplier", String.valueOf(booster.getMultiplier())));
+                                Placeholder.unparsed("multiplier", String.valueOf(booster.getMultiplier()))));
+
+                        if (booster.isActive())
+                            templates.add(Placeholder.unparsed("end_time", DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(expiryTime)));
+                        else
+                            templates.add(Placeholder.unparsed("end_time", "unknown"));
+
                         for (TagResolver tagResolver1 : templates)
                             tagResolver.resolver(tagResolver1); // cheaty and lazy way I know
 
                         if (booster.isActive())
-                            templates.add(Template.of("end_time", DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT).format(expiryTime)));
-                        else
-                            templates.add(Template.of("end_time", "unknown"));
-                        if (booster.isActive())
-                            activeBoosterComponents.add(miniMessage.parse(activeBooster, templates));
+                            activeBoosterComponents.add(miniMessage.deserialize(activeBooster, tagResolver.build()));
                         else if (!booster.finished())
-                            queuedBoosterComponents.add(miniMessage.parse(queuedBooster, templates));
+                            queuedBoosterComponents.add(miniMessage.deserialize(queuedBooster, tagResolver.build()));
+
                     }
-                    Component separator = miniMessage.parse("\n");
-                    context.getSource().sendMessage(miniMessage.parse(message, List.of(
-                            Template.of("active_boosters", Component.join(separator, activeBoosterComponents)),
-                            Template.of("queued_boosters", Component.join(separator, queuedBoosterComponents))
+                    Component separator = miniMessage.deserialize("\n");
+                    context.getSource().sendMessage(miniMessage.deserialize(message, TagResolver.resolver(
+                            Placeholder.component("active_boosters", Component.join(JoinConfiguration.separator(separator), activeBoosterComponents)),
+                            Placeholder.component("queued_boosters", Component.join(JoinConfiguration.separator(separator), queuedBoosterComponents))
                     )));
                     return 1;
                 })

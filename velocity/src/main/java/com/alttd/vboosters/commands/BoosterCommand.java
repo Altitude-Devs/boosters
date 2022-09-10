@@ -10,6 +10,8 @@ import com.alttd.vboosters.VelocityBoosters;
 import com.alttd.vboosters.data.VelocityBooster;
 import com.alttd.vboosters.managers.BoosterManager;
 import com.alttd.vboosters.storage.VelocityBoosterStorage;
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;

@@ -5,6 +5,7 @@ import com.alttd.boosterapi.BoosterType;
 import com.alttd.boosterapi.util.ALogger;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Date;
 import java.util.UUID;
 
 public class ServerBooster implements Booster {
@@ -50,6 +51,7 @@ public class ServerBooster implements Booster {
 
     @Override
     public void setActive(Boolean active) {
+        this.startingTime = new Date().getTime();
         this.active = active;
     }
 
@@ -85,7 +87,7 @@ public class ServerBooster implements Booster {
 
     @Override
     public Long getEndTime() {
-        return startingTime = duration;
+        return startingTime + duration;
     }
 
     @Override

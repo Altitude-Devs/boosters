@@ -2,6 +2,7 @@ package com.alttd.vboosters.data;
 
 import com.alttd.boosterapi.Booster;
 import com.alttd.boosterapi.BoosterType;
+import com.alttd.boosterapi.config.BoosterStorage;
 import com.alttd.vboosters.VelocityBoosters;
 import com.alttd.vboosters.storage.VelocityBoosterStorage;
 import com.google.common.io.ByteArrayDataOutput;
@@ -35,7 +36,6 @@ public class VelocityBooster implements Booster {
         this.active = false;
         this.finished = false;
         this.startingTime = new Date().getTime();
-        saveBooster();
     }
 
     public VelocityBooster(BoosterType type, String playerName, long duration, double multiplier) {
@@ -62,6 +62,7 @@ public class VelocityBooster implements Booster {
     @Override
     public void setActive(Boolean active) {
         this.active = active;
+        updateQueue();
     }
 
     @Override
@@ -150,28 +151,17 @@ public class VelocityBooster implements Booster {
     public void saveBooster() {
         VelocityBoosterStorage vbs = VelocityBoosterStorage.getVelocityBoosterStorage();
         vbs.getBoosters().put(uuid, this);
-        vbs.saveBoosters(vbs.getBoosters().values());
-        updateQueue();
-        ByteArrayDataOutput out = ByteStreams.newDataOutput();
-        out.writeUTF("reload");
-        VelocityBoosters.getPlugin().getProxy().getAllServers()
-                .forEach(registeredServer -> registeredServer.sendPluginMessage(VelocityBoosters.getPlugin().getChannelIdentifier(), out.toByteArray()));
     }
 
     public void finish() { //TODO finish it on the servers as well
         finished = true;
         stopBooster();
-        saveBooster(); //Deletes inactive boosters
+        updateQueue(); //Deletes inactive boosters
         List<Booster> collect = VelocityBoosterStorage.getVelocityBoosterStorage().getBoosters(boosterType).stream().sorted().collect(Collectors.toList());
         if (collect.size() <= 1)
             return;
         Booster booster = collect.get(1);
         booster.setActive(true);
-        ByteArrayDataOutput out = ByteStreams.newDataOutput();
-        out.writeUTF("activate");
-        out.writeUTF(booster.getUUID().toString());
-        VelocityBoosters.getPlugin().getProxy().getAllServers()
-                .forEach(registeredServer -> registeredServer.sendPluginMessage(VelocityBoosters.getPlugin().getChannelIdentifier(), out.toByteArray()));
         //TODO send plugin message that this is finished
     }
 
@@ -180,7 +170,7 @@ public class VelocityBooster implements Booster {
         return finished;
     }
 
-    private void updateQueue() {
+    public void updateQueue() {
         Collection<Booster> boosters = VelocityBoosterStorage.getVelocityBoosterStorage().getBoosters(getType());
         if (boosters.isEmpty())
             return;
@@ -192,6 +182,12 @@ public class VelocityBooster implements Booster {
         }
         if (collect.size() > 1)
             fixTimes(collect);
+
+        VelocityBoosterStorage.getVelocityBoosterStorage().saveBoosters();
+        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+        out.writeUTF("reload");
+        VelocityBoosters.getPlugin().getProxy().getAllServers()
+                .forEach(registeredServer -> registeredServer.sendPluginMessage(VelocityBoosters.getPlugin().getChannelIdentifier(), out.toByteArray()));
     }
 
     private void fixTimes(List<Booster> sorted) {

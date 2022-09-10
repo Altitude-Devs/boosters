@@ -50,15 +50,17 @@ public abstract class BoosterStorage {
     }
 
     public void reload() {
+        if (Config.DEBUG)
+            ALogger.info("Reloading boosters...");
         boosters.clear();
         boosters.putAll(loadBoosters());
     }
 
-    public Map<UUID, Booster> getBoosters() {
+    public synchronized Map<UUID, Booster> getBoosters() {
         return boosters;
     }
 
-    public Map<UUID, Booster> loadBoosters()  {
+    public synchronized Map<UUID, Booster> loadBoosters()  {
         Map<UUID, Booster> boosters = new HashMap<>();
 
         try {
@@ -72,7 +74,7 @@ public abstract class BoosterStorage {
                 Booster booster = loadBooster(parser);
                 if (Config.DEBUG)
                     ALogger.info("Loading booster [" + booster.getType() + "] activated by [" + booster.getActivator()+ "].");
-                if (new Date(booster.getEndTime()).after(new Date()))
+                if (booster.getTimeRemaining() < 1)
                     continue;
                 boosters.put(booster.getUUID(), booster);
                 if (parser.nextToken() != null && !parser.currentToken().isStructEnd()) {
@@ -86,18 +88,17 @@ public abstract class BoosterStorage {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        saveBoosters(boosters.values());
         return boosters;
     }
 
     public abstract Booster loadBooster(JsonParser parser) throws IOException;
 
-    public void saveBoosters(Collection<Booster> boosters) {
+    public synchronized void saveBoosters(Collection<Booster> boosters) {
         try {
             JsonGenerator generator = new JsonFactory().createGenerator(CONFIG_FILE, JsonEncoding.UTF8);
             Date date = new Date();
             for (Booster booster : boosters) {
-                if (booster.finished() || new Date(booster.getEndTime()).after(date))
+                if (booster.finished() || (booster.isActive() && new Date(booster.getEndTime()).before(date)))
                     continue;
                 saveBooster(booster, generator);
             }
@@ -105,8 +106,12 @@ public abstract class BoosterStorage {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
+
+    public void saveBoosters() {
+        saveBoosters(boosters.values());
+    }
+
     private void saveBooster(Booster booster, JsonGenerator generator) throws IOException {
         generator.writeStartObject();
 
@@ -122,7 +127,11 @@ public abstract class BoosterStorage {
         generator.writeEndObject();
     }
 
-    public Collection<Booster> getBoosters(BoosterType type) {
+    public synchronized Collection<Booster> getBoosters(BoosterType type) {
         return boosters.values().stream().filter(booster -> booster.getType().equals(type)).collect(Collectors.toList());
     }
+
+    public synchronized void add(Booster booster) {
+        boosters.put(booster.getUUID(), booster);
+    };
 }

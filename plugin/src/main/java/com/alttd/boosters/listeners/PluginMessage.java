@@ -16,6 +16,8 @@ public class PluginMessage implements PluginMessageListener {
     @Override
     public void onPluginMessageReceived(String channel, Player player, byte[] bytes) {
         if(!channel.equals(Config.pluginMessageChannel)) return;
+        if (Config.DEBUG)
+            ALogger.info("Received plugin message");
         ByteArrayDataInput in = ByteStreams.newDataInput(bytes);
         String subChannel = in.readUTF();
         switch (subChannel) {

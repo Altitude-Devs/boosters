@@ -3,13 +3,23 @@ package com.alttd.vboosters.managers;
 import com.alttd.boosterapi.Booster;
 import com.alttd.boosterapi.BoosterType;
 import com.alttd.boosterapi.config.Config;
+import com.alttd.boosterapi.util.ALogger;
 import com.alttd.vboosters.VelocityBoosters;
+import com.alttd.vboosters.data.VelocityBooster;
+import com.alttd.vboosters.storage.VelocityBoosterStorage;
+import com.mysql.cj.log.Log;
 import com.velocitypowered.api.scheduler.ScheduledTask;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class BoosterManager {
@@ -32,6 +42,8 @@ public class BoosterManager {
             for (Booster booster: getActiveBoosters()) {
                 if (booster.getTimeRemaining() > 0) continue;
                 booster.finish();
+
+                plugin.getProxy().sendMessage(MiniMessage.miniMessage().deserialize("<green>Booster <booster> ended!</green>", Placeholder.unparsed("booster", booster.getType().getBoosterName())));
                 // send data to the backend servers to let them know the booster is no longer active
             }
             getActiveBoosters().removeIf(Booster::finished);
@@ -67,16 +79,21 @@ public class BoosterManager {
     }
 
     public void addBooster(Booster booster) {
-        BoosterType type = booster.getType();
-        if(isBoosted(type)) {
-            Booster activeBooster = getBoosted(type);
-            Booster queuedBooster = getHighestBooster(type);
-            if (queuedBooster != null && queuedBooster.getMultiplier() > activeBooster.getMultiplier()) {
-                swapBooster(activeBooster, queuedBooster);
-            }
-        } else {
-            activateBooster(booster);
-        }
+//        BoosterType type = booster.getType();
+//        if (isBoosted(type)) {
+//            Booster activeBooster = getBoosted(type);
+//            Booster queuedBooster = getHighestBooster(type);
+//            if (queuedBooster != null && queuedBooster.getMultiplier() > activeBooster.getMultiplier()) {
+//                swapBooster(activeBooster, queuedBooster);
+//            }
+//        } else {
+//            activateBooster(booster);
+//        }
+        VelocityBoosterStorage.getVelocityBoosterStorage().add(booster);
+        if (booster instanceof VelocityBooster velocityBooster)
+            velocityBooster.updateQueue();
+        else
+            ALogger.error("Tried to add a not velocity booster from velocity");
     }
 
     public void removeBooster(Booster booster) {
@@ -96,7 +113,8 @@ public class BoosterManager {
     }
 
     public void deactivateBooster(Booster booster) {
-        queuedBoosters.add(booster);
+        if (booster.isActive())
+            queuedBoosters.add(booster);
         activeBoosters.remove(booster);
         booster.setActive(false);
     }

@@ -121,9 +121,16 @@ public class BoosterCommand {
                                                     addAllMcMMOBoosters(username, duration, multiplier);
                                                 else
                                                     VelocityBoosters.getPlugin().getBoosterManager().addBooster(new VelocityBooster(boosterType, username, duration, multiplier));
-                                                String msg = "[" + username + "] purchased booster of type [" + Utils.capitalize(boosterType.getBoosterName()) + "]"; //TODO check if there was a booster active already and change message based on that
+
+                                                String boosterName = Utils.capitalize(boosterType.getBoosterName());
+                                                String msg = "[" + username + "] purchased booster of type [" + boosterName + "]"; //Add to config for discord only
                                                 DiscordSendMessage.sendEmbed(Config.BOOST_ANNOUNCE_CHANNEL, "Booster Purchased", msg);
-                                                VelocityBoosters.getPlugin().getProxy().sendMessage(MiniMessage.miniMessage().deserialize(msg));
+
+                                                TagResolver templates = TagResolver.resolver(
+                                                        Placeholder.unparsed("player", username),
+                                                        Placeholder.unparsed("booster", boosterName));
+                                                VelocityBoosters.getPlugin().getProxy().sendMessage(MiniMessage.miniMessage()
+                                                        .deserialize(Config.BOOST_SERVER_MESSAGE, templates));
                                                 VelocityBoosters.getPlugin().getLogger().info(msg);
                                                 return 1;
                                             })

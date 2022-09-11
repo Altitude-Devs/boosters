@@ -193,12 +193,14 @@ public final class Config {
     public static String INVALID_DONOR_RANK = "<red><rank> is not a valid donor rank.</red>";
     public static String DEMOTE_MESSAGE = "<red>Your <rank> rank was refunded and removed. Contact staff if you're unsure what caused this.</red>";
     public static String PROMOTE_MESSAGE = "<green>Thank you for your support! We applied the <rank> rank to your account.</green>";
+    public static String BOOST_SERVER_MESSAGE = "<light_purple>* <player> activated an <dark_purple><booster></dark_purple> booster!</light_purple>";
     private static void loadMessages() {
         INVALID_USER = getString("messages.invalid-user", INVALID_USER);
         INVALID_ACTION = getString("messages.invalid-action", INVALID_ACTION);
         INVALID_DONOR_RANK = getString("messages.invalid-donor-rank", INVALID_DONOR_RANK);
         DEMOTE_MESSAGE = getString("messages.demote", DEMOTE_MESSAGE);
         PROMOTE_MESSAGE = getString("messages.promote", PROMOTE_MESSAGE);
+        BOOST_SERVER_MESSAGE = getString("messages.boost-server", BOOST_SERVER_MESSAGE);
     }
 
     public static boolean DEBUG = false;

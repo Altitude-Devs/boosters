@@ -12,6 +12,10 @@ public class MyPetListener implements Listener {
 
     @EventHandler
     public void onMyPetExpEvent(MyPetExpEvent event) {
+        double exp = event.getPet().getExp();
+        if (exp == 0) {
+            return;
+        }
         BoosterManager bm = BoostersPlugin.getInstance().getBoosterManager();
         if(bm.isBoosted(BoosterType.MYPET)) {
             Booster b = bm.getBooster(BoosterType.MYPET);

@@ -29,6 +29,6 @@ public class MyPetListener implements Listener {
             return;
 
         Booster booster = myPetBooster.get();
-        event.setExp(booster.useMultiplier(exp));
+        event.setExp(booster.useMultiplier(event.getExp()));
     }
 }

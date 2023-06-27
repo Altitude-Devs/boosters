@@ -1,28 +1,28 @@
 package com.alttd.boosterapi;
 
 import com.alttd.boosterapi.config.Config;
-import com.alttd.boosterapi.config.ServerConfig;
-import com.alttd.boosterapi.database.Database;
+import com.alttd.boosterapi.util.Logger;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 
 public class BoosterImplementation implements BoosterAPI {
 
     private static BoosterAPI instance;
+    private final Logger logger;
 
     private LuckPerms luckPerms;
-    private Database database;
 
-    public BoosterImplementation() {
+    private BoosterImplementation(Logger logger) {
         instance = this;
+        this.logger = logger;
         reloadConfig();
 
         luckPerms = getLuckPerms();
     }
 
-    public static BoosterAPI get() {
+    public static BoosterAPI get(Logger logger) {
         if (instance == null)
-            instance = new BoosterImplementation();
+            instance = new BoosterImplementation(logger);
         return instance;
     }
 
@@ -35,7 +35,7 @@ public class BoosterImplementation implements BoosterAPI {
 
     @Override
     public void reloadConfig() {
-        Config.init();
+        Config.reload(logger);
     }
 
 }

@@ -1,32 +1,32 @@
 package com.alttd.boosters.listeners;
 
-import com.alttd.boosterapi.Booster;
-import com.alttd.boosterapi.BoosterType;
-import com.alttd.boosters.BoostersPlugin;
-import com.alttd.boosters.managers.BoosterManager;
+import com.alttd.boosterapi.data.Booster;
+import com.alttd.boosterapi.data.BoosterCache;
+import com.alttd.boosterapi.data.BoosterType;
 import com.gmail.nossr50.events.experience.McMMOPlayerXpGainEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-public class MCmmoListener implements Listener {
+import java.util.Optional;
+
+public class mcMMOListener implements Listener {
+
+    private final BoosterCache boosterCache;
+
+    public mcMMOListener(BoosterCache boosterCache) {
+        this.boosterCache = boosterCache;
+    }
+
 
     @EventHandler
     public void onMcMMOExperienceEvent(McMMOPlayerXpGainEvent event) {
-        BoosterManager bm = BoostersPlugin.getInstance().getBoosterManager();
-        if (bm.isBoosted(BoosterType.MCMMO)) {
-            Booster b = bm.getBooster(BoosterType.MCMMO);
-            double multiplier = b.getMultiplier() + 1;
-            event.setRawXpGained(Math.round(event.getRawXpGained() * multiplier));
-            return;
-        }
         String skillName = event.getSkill().name();
         BoosterType type = BoosterType.getByName(skillName);
-        if (bm.isBoosted(type)) {
-            Booster b = bm.getBooster(type);
-            double multiplier = b.getMultiplier() + 1;
-            event.setRawXpGained(Math.round(event.getRawXpGained() * multiplier));
+        Optional<Booster> optionalBooster = boosterCache.getActiveBooster(type);
+        if (optionalBooster.isEmpty())
             return;
-        }
+
+        Booster booster = optionalBooster.get();
+        event.setRawXpGained(Math.round(booster.useMultiplier(event.getRawXpGained())));
     }
-    // TODO : add individual mcmmo skill boosters
 }

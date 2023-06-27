@@ -1,53 +1,38 @@
 package com.alttd.boosters;
 
-import com.alttd.boosterapi.BoosterAPI;
-import com.alttd.boosterapi.BoosterImplementation;
+import com.alttd.boosterapi.config.BoosterFileStorage;
 import com.alttd.boosterapi.config.Config;
-import com.alttd.boosterapi.util.ALogger;
+import com.alttd.boosterapi.data.BoosterCache;
+import com.alttd.boosterapi.util.Logger;
 import com.alttd.boosters.commands.BoosterCommand;
-import com.alttd.boosters.listeners.MCmmoListener;
 import com.alttd.boosters.listeners.MyPetListener;
 import com.alttd.boosters.listeners.PhantomSpawnListener;
 import com.alttd.boosters.listeners.PluginMessage;
-import com.alttd.boosters.managers.BoosterManager;
-import com.alttd.boosters.storage.ServerBoosterStorage;
+import com.alttd.boosters.listeners.mcMMOListener;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class BoostersPlugin extends JavaPlugin {
 
-    private static BoostersPlugin instance;
-    private static BoosterAPI boosterAPI;
-    private static BoosterManager boosterManager;
-
     @Override
     public void onEnable() {
-        instance = this;
-        ALogger.init(getSLF4JLogger());
-        boosterAPI = new BoosterImplementation();
-        boosterManager = new BoosterManager();
+        Logger logger = new Logger(getSLF4JLogger());
+        BoosterCache boosterCache = new BoosterCache(new BoosterFileStorage(logger));
 
         if (getServer().getPluginManager().isPluginEnabled("MyPet")) {
-            registerListener(new MyPetListener());
+            registerListener(new MyPetListener(boosterCache));
         }
 
         if (getServer().getPluginManager().isPluginEnabled("mcMMO")) {
-            registerListener(new MCmmoListener());
+            registerListener(new mcMMOListener(boosterCache));
         }
 
-        registerListener(new PhantomSpawnListener());
+        registerListener(new PhantomSpawnListener(boosterCache));
 
-        getServer().getMessenger().registerOutgoingPluginChannel(this, Config.pluginMessageChannel);
-        getServer().getMessenger().registerIncomingPluginChannel(this, Config.pluginMessageChannel, new PluginMessage());
-        registerCommand("listboosters", new BoosterCommand());
-        ServerBoosterStorage.getServerBoosterStorage(); //this loads the boosters in
-    }
-
-    @Override
-    public void onDisable() {
-        instance = null;
-        boosterAPI = null;
+        getServer().getMessenger().registerOutgoingPluginChannel(this, Config.SETTINGS.PLUGIN_MESSAGE_CHANNEL);
+        getServer().getMessenger().registerIncomingPluginChannel(this, Config.SETTINGS.PLUGIN_MESSAGE_CHANNEL, new PluginMessage(logger, boosterCache));
+        registerCommand("listboosters", new BoosterCommand(boosterCache, logger));
     }
 
     public void registerListener(Listener... listeners) {
@@ -58,17 +43,5 @@ public final class BoostersPlugin extends JavaPlugin {
 
     public void registerCommand(String commandName, CommandExecutor CommandExecutor) {
         getCommand(commandName).setExecutor(CommandExecutor);
-    }
-
-    public static BoostersPlugin getInstance() {
-        return instance;
-    }
-
-    public BoosterAPI getAPI() {
-        return boosterAPI;
-    }
-
-    public BoosterManager getBoosterManager() {
-        return boosterManager;
     }
 }

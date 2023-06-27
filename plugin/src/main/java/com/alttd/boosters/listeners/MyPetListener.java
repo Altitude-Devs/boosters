@@ -1,14 +1,21 @@
 package com.alttd.boosters.listeners;
 
-import com.alttd.boosterapi.Booster;
-import com.alttd.boosterapi.BoosterType;
-import com.alttd.boosters.BoostersPlugin;
-import com.alttd.boosters.managers.BoosterManager;
+import com.alttd.boosterapi.data.Booster;
+import com.alttd.boosterapi.data.BoosterCache;
+import com.alttd.boosterapi.data.BoosterType;
 import de.Keyle.MyPet.api.event.MyPetExpEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
+import java.util.Optional;
+
 public class MyPetListener implements Listener {
+
+    private final BoosterCache boosterCache;
+
+    public MyPetListener(BoosterCache boosterCache) {
+        this.boosterCache = boosterCache;
+    }
 
     @EventHandler
     public void onMyPetExpEvent(MyPetExpEvent event) {
@@ -16,11 +23,12 @@ public class MyPetListener implements Listener {
         if (exp == 0) {
             return;
         }
-        BoosterManager bm = BoostersPlugin.getInstance().getBoosterManager();
-        if(bm.isBoosted(BoosterType.MYPET)) {
-            Booster b = bm.getBooster(BoosterType.MYPET);
-            double multiplier = b.getMultiplier() + 1;
-            event.setExp(event.getExp() * multiplier);
-        }
+
+        Optional<Booster> myPetBooster = boosterCache.getActiveBooster(BoosterType.MYPET);
+        if (myPetBooster.isEmpty())
+            return;
+
+        Booster booster = myPetBooster.get();
+        event.setExp(booster.useMultiplier(exp));
     }
 }

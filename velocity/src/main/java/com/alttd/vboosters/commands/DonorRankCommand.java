@@ -2,7 +2,8 @@ package com.alttd.vboosters.commands;
 
 import com.alttd.boosterapi.BoosterAPI;
 import com.alttd.boosterapi.config.Config;
-import com.alttd.boosterapi.util.Utils;
+import com.alttd.boosterapi.util.Logger;
+import com.alttd.boosterapi.util.StringModifier;
 import com.alttd.vboosters.VelocityBoosters;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -28,8 +29,10 @@ import java.util.Collection;
 public class DonorRankCommand {
 
     private final MiniMessage miniMessage;
+    private final Logger logger;
 
-    public DonorRankCommand(ProxyServer proxyServer) {
+    public DonorRankCommand(ProxyServer proxyServer, Logger logger) {
+        this.logger = logger;
         miniMessage = MiniMessage.miniMessage();
 
         LiteralCommandNode<CommandSource> command = LiteralArgumentBuilder
@@ -65,7 +68,7 @@ public class DonorRankCommand {
                                 })
                                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("rank", StringArgumentType.string())
                                         .suggests((context, builder) -> {
-                                            Collection<String> possibleValues = new ArrayList<>(Config.donorRanks);
+                                            Collection<String> possibleValues = new ArrayList<>(Config.SETTINGS.DONOR_RANKS);
                                             String remaining = builder.getRemaining().toLowerCase();
                                             for (String str : possibleValues) {
                                                 if (str.toLowerCase().startsWith(remaining)) {
@@ -79,19 +82,19 @@ public class DonorRankCommand {
                                             String username = context.getArgument("username", String.class);
                                             String action = context.getArgument("action", String.class);
                                             String rank = context.getArgument("rank", String.class).toLowerCase();
-                                            LuckPerms luckPerms = BoosterAPI.get().getLuckPerms();
+                                            LuckPerms luckPerms = BoosterAPI.get(logger).getLuckPerms();
                                             User user = luckPerms.getUserManager().getUser(username); //TODO test if this works with username
 
                                             if (user == null) {
                                                 commandSource.sendMessage(miniMessage.deserialize(
-                                                        Config.INVALID_USER,
+                                                        Config.DONOR_RANK_MESSAGES.INVALID_USER,
                                                         Placeholder.unparsed("player", username)));
                                                 return 1;
                                             }
 
-                                            if (!Config.donorRanks.contains(rank)) {
+                                            if (!Config.SETTINGS.DONOR_RANKS.contains(rank)) {
                                                 commandSource.sendMessage(miniMessage.deserialize(
-                                                        Config.INVALID_DONOR_RANK,
+                                                        Config.DONOR_RANK_MESSAGES.INVALID_DONOR_RANK,
                                                         Placeholder.unparsed("rank", rank)));
                                                 return 1;
                                             }
@@ -99,7 +102,7 @@ public class DonorRankCommand {
                                             switch (action) {
                                                 case "promote" -> promote(user, rank);
                                                 case "demote" -> demote(user, rank);
-                                                default -> commandSource.sendMessage(miniMessage.deserialize(Config.INVALID_ACTION));
+                                                default -> commandSource.sendMessage(miniMessage.deserialize(Config.DONOR_RANK_MESSAGES.INVALID_ACTION));
                                             }
                                             return 1;
                                         })
@@ -119,18 +122,18 @@ public class DonorRankCommand {
     }
 
     private void promote(User user, String rank) {
-        LuckPerms luckPerms = BoosterAPI.get().getLuckPerms();
+        LuckPerms luckPerms = BoosterAPI.get(logger).getLuckPerms();
         user.getNodes(NodeType.INHERITANCE).stream()
                 .filter(Node::getValue)
                 .forEach(node -> {
-                    if (Config.donorRanks.contains(node.getGroupName()))
+                    if (Config.SETTINGS.DONOR_RANKS.contains(node.getGroupName()))
                         user.data().remove(node);
                 });
         user.data().add(InheritanceNode.builder(rank).build());
         VelocityBoosters.getPlugin().getProxy().getPlayer(user.getUniqueId()).ifPresent(player -> {
             if (player.isActive()) {
-                player.sendMessage(miniMessage.deserialize(Config.PROMOTE_MESSAGE,
-                        Placeholder.unparsed("rank", Utils.capitalize(rank)),
+                player.sendMessage(miniMessage.deserialize(Config.DONOR_RANK_MESSAGES.PROMOTE_MESSAGE,
+                        Placeholder.unparsed("rank", StringModifier.capitalize(rank)),
                         Placeholder.unparsed("player", player.getUsername())));
             }
         });
@@ -138,17 +141,17 @@ public class DonorRankCommand {
     }
 
     private void demote(User user, String rank) {
-        LuckPerms luckPerms = BoosterAPI.get().getLuckPerms();
+        LuckPerms luckPerms = BoosterAPI.get(logger).getLuckPerms();
         user.getNodes(NodeType.INHERITANCE).stream()
                 .filter(Node::getValue)
                 .forEach(node -> {
-                    if (Config.donorRanks.contains(node.getGroupName()))
+                    if (Config.SETTINGS.DONOR_RANKS.contains(node.getGroupName()))
                         user.data().remove(node);
                 });
         VelocityBoosters.getPlugin().getProxy().getPlayer(user.getUniqueId()).ifPresent(player -> {
             if (player.isActive()) {
-                player.sendMessage(miniMessage.deserialize(Config.DEMOTE_MESSAGE,
-                        Placeholder.unparsed("rank", Utils.capitalize(rank)),
+                player.sendMessage(miniMessage.deserialize(Config.DONOR_RANK_MESSAGES.DEMOTE_MESSAGE,
+                        Placeholder.unparsed("rank", StringModifier.capitalize(rank)),
                         Placeholder.unparsed("player", player.getUsername())));
             }
         });

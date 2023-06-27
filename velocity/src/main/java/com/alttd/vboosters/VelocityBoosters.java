@@ -2,12 +2,14 @@ package com.alttd.vboosters;
 
 import com.alttd.boosterapi.BoosterAPI;
 import com.alttd.boosterapi.BoosterImplementation;
-import com.alttd.boosterapi.util.ALogger;
+import com.alttd.boosterapi.config.BoosterFileStorage;
+import com.alttd.boosterapi.config.Config;
+import com.alttd.boosterapi.data.BoosterCache;
+import com.alttd.boosterapi.util.Logger;
 import com.alttd.vboosters.commands.BoosterCommand;
 import com.alttd.vboosters.commands.DonorRankCommand;
 import com.alttd.vboosters.listeners.PluginMessageListener;
-import com.alttd.vboosters.managers.BoosterManager;
-import com.alttd.vboosters.storage.VelocityBoosterStorage;
+import com.alttd.vboosters.task.BoosterTask;
 import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
@@ -17,7 +19,6 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
-import org.slf4j.Logger;
 
 // TODO use the version created in build.gradle.kts
 @Plugin(id = "boosterplugin", name = "BoosterPlugin", version = "1.0.0",
@@ -32,34 +33,34 @@ public class VelocityBoosters {
     private final Logger logger;
 
     private BoosterAPI boosterAPI;
-    private BoosterManager boosterManager;
+    private BoosterCache boosterCache;
 
-    private ChannelIdentifier channelIdentifier = MinecraftChannelIdentifier.from("altitude:boosterplugin");
+    private final ChannelIdentifier channelIdentifier = MinecraftChannelIdentifier.from(
+            Config.SETTINGS.PLUGIN_MESSAGE_CHANNEL);
 
     @Inject
-    public VelocityBoosters(ProxyServer proxyServer, Logger proxyLogger) {
+    public VelocityBoosters(ProxyServer proxyServer, org.slf4j.Logger proxyLogger) {
         plugin = this;
         server = proxyServer;
-        logger = proxyLogger;
+        this.logger = new Logger(proxyLogger);
     }
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
-        ALogger.init(logger);
-        boosterAPI = new BoosterImplementation();
-        boosterManager = new BoosterManager(this);
+        boosterAPI = BoosterImplementation.get(logger);
+        this.boosterCache = new BoosterCache(new BoosterFileStorage(logger));
 
         server.getChannelRegistrar().register(channelIdentifier);
         server.getEventManager().register(this, new PluginMessageListener(channelIdentifier));
 
         loadCommands();
         reloadConfig();
-        VelocityBoosterStorage.getVelocityBoosterStorage(); //this loads the boosters in
+        new BoosterTask(logger, boosterCache).init();
     }
 
     @Subscribe
     public void onShutdown(ProxyShutdownEvent event) {
-        boosterManager.saveAllBoosters();
+        boosterCache.updateAndSave();
     }
 
     public void reloadConfig() {
@@ -80,16 +81,12 @@ public class VelocityBoosters {
 
     public void loadCommands() {
         // all (proxy)commands go here
-        new BoosterCommand(server);
-        new DonorRankCommand(server);
+        server.getCommandManager().register("booster", new BoosterCommand(server, boosterCache, logger));
+        new DonorRankCommand(server, logger);
     }
 
     public ChannelIdentifier getChannelIdentifier() {
         return channelIdentifier;
-    }
-
-    public BoosterManager getBoosterManager() {
-        return boosterManager;
     }
 
 }

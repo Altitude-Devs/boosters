@@ -36,7 +36,7 @@ public final class Config extends AbstractConfig {
     }
 
     public static class SETTINGS {
-        private static final String prefix = "settings";
+        private static final String prefix = "settings.";
 
         public static int UPDATE_FREQUENCY_MINUTES = 1;
         public static String PLUGIN_MESSAGE_CHANNEL = "altitude:boosterplugin";

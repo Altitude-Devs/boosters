@@ -105,7 +105,6 @@ public class BoosterCache {
     }
 
     public synchronized void updateAndSave() {
-        getAllActiveBoosters().forEach(Booster::updateDuration); //TODO test if this needs to be re-added to the map (it shouldn't afaik)
         boosterFileStorage.saveBoosters(boosters.values().stream().flatMap(List::stream).collect(Collectors.toList()));
     }
 }

@@ -123,14 +123,7 @@ public class BoosterFileStorage {
         parser.nextValue();
         double multiplier = parser.getValueAsDouble();
 
-        jsonToken = parser.nextToken();
-        if (jsonToken != JsonToken.FIELD_NAME || !"running".equals(parser.getCurrentName()))
-            return error("Didn't find running at expected location");
-        parser.nextValue();
-        boolean running = parser.getValueAsBoolean();
-        parser.nextValue();
-
-        return Optional.of(new Booster(boosterUUID, activatorName, boosterType, startingTime, duration, multiplier, running));
+        return Optional.of(new Booster(boosterUUID, activatorName, boosterType, startingTime, duration, multiplier));
     }
 
     private Optional<Booster> error(String error) {
@@ -160,7 +153,6 @@ public class BoosterFileStorage {
         generator.writeNumberField("startingTime", booster.getStartingTime().toEpochMilli());
         generator.writeNumberField("duration", booster.getDuration().toMillis());
         generator.writeNumberField("multiplier", booster.getMultiplier());
-        generator.writeBooleanField("running", booster.getRunning());
 
         generator.writeEndObject();
     }

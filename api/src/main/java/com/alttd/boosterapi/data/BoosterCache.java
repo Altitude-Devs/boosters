@@ -41,7 +41,14 @@ public class BoosterCache {
             return;
         }
         LinkedList<Booster> list = boosters.get(boosterType);
+        Booster oldActive = null;
+        if (list.size() > 1) {
+            oldActive = list.get(0);
+        }
         list.sort(Booster::compareTo);
+        if (oldActive != null && !list.get(0).getBoosterUUID().equals(oldActive.getBoosterUUID())) {
+            oldActive.updateDuration();
+        }
     }
 
     public synchronized Optional<Booster> getActiveBooster(BoosterType boosterType) {

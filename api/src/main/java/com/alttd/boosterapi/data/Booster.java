@@ -15,7 +15,6 @@ public class Booster implements Comparable<Booster> {
     private Duration duration;
     private final BoosterType boosterType;
     private final Double multiplier;
-    private Boolean running;
 
     public Booster(UUID boosterUUID, BoosterType boosterType, String reason, Duration duration, double multiplier) {
         this.boosterUUID = boosterUUID;
@@ -23,7 +22,6 @@ public class Booster implements Comparable<Booster> {
         this.activatorName = reason;
         this.duration = duration;
         this.multiplier = multiplier;
-        this.running = false;
         this.startingTime = Instant.now();
     }
 
@@ -32,14 +30,13 @@ public class Booster implements Comparable<Booster> {
     }
 
     public Booster(UUID boosterUUID, String activatorName, BoosterType boosterType, Instant startingTime,
-                   Duration duration, double multiplier, boolean running) {
+                   Duration duration, double multiplier) {
         this.boosterUUID = boosterUUID;
         this.activatorName = activatorName;
         this.boosterType = boosterType;
         this.startingTime = startingTime;
         this.duration = duration;
         this.multiplier = multiplier;
-        this.running = running;
     }
 
     public void updateDuration() {
@@ -76,10 +73,6 @@ public class Booster implements Comparable<Booster> {
         return multiplier;
     }
 
-    public Boolean getRunning() {
-        return running;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -114,7 +107,6 @@ public class Booster implements Comparable<Booster> {
                 ", duration=" + duration +
                 ", boosterType=" + boosterType +
                 ", multiplier=" + multiplier +
-                ", running=" + running +
                 '}';
     }
 }

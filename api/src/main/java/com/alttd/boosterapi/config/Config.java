@@ -47,7 +47,7 @@ public final class Config extends AbstractConfig {
             UPDATE_FREQUENCY_MINUTES = config.getInt(prefix, "update-frequency-minutes", UPDATE_FREQUENCY_MINUTES);
             BOOST_ANNOUNCE_CHANNEL = config.getLong(prefix, "boost-announce-channel", BOOST_ANNOUNCE_CHANNEL);
             PLUGIN_MESSAGE_CHANNEL = config.getString(prefix, "plugin-message-channel", PLUGIN_MESSAGE_CHANNEL);
-            DONOR_RANKS = config.getList(prefix, "donor-ranks", DONOR_RANKS);
+//            DONOR_RANKS = config.getStringList(prefix, "donor-ranks", DONOR_RANKS);
         }
     }
 

@@ -148,9 +148,28 @@ abstract class AbstractConfig {
         return config.node(splitPath(path)).getLong(def);
     }
 
-    protected static <T> List<String> getList(String prefix, String path, T def) {
+    private static void setStringList(String prefix, String path, List<String> def) {
+        path = prefix + path;
+        System.out.println("Setting: " + def);
+        if(config.node(splitPath(path)).virtual()) {
+            try {
+                config.node(splitPath(path)).setList(TypeToken.get(String.class), def);
+            } catch (SerializationException e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                config.node(splitPath(path)).setList(TypeToken.get(String.class), def);
+            } catch (SerializationException e) {
+                e.printStackTrace();
+            }
+        }
+        saveConfig();
+    }
+
+    protected static List<String> getStringList(String prefix, String path, List<String> def) {
         try {
-            set(prefix, path, def);
+            setStringList(prefix, path, def);
             return config.node(splitPath(path)).getList(TypeToken.get(String.class));
         } catch(SerializationException ex) {
             ex.printStackTrace();

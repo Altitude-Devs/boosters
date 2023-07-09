@@ -108,6 +108,11 @@ public class BoosterCache {
         list.removeIf(filterBooster -> filterBooster.getBoosterUUID().equals(booster.getBoosterUUID()));
         boosters.put(boosterType, list);
         updateOrder(boosterType);
+        LinkedList<Booster> updatedBoosterList = boosters.get(boosterType);
+        if (updatedBoosterList.size() > 0) {
+            Booster nextBooster = updatedBoosterList.get(0);
+            nextBooster.updateTimeAfterReActivate();
+        }
         boosterFileStorage.saveBoosters(boosters.values().stream().flatMap(List::stream).collect(Collectors.toList()));
     }
 

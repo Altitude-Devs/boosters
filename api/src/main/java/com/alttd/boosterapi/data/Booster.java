@@ -45,6 +45,10 @@ public class Booster implements Comparable<Booster> {
         duration = duration.minus(elapsedTime);
     }
 
+    public void updateTimeAfterReActivate() {
+        startingTime = Instant.now();
+    }
+
     public double useMultiplier(double exp) {
         return exp * (multiplier + 1);
     }

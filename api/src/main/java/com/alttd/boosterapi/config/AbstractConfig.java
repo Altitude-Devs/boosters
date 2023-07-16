@@ -114,7 +114,7 @@ abstract class AbstractConfig {
         saveConfig();
     }
 
-    protected static void setString(String path, String def) {
+    protected void setString(String path, String def) {
         try {
             if(config.node(splitPath(path)).virtual())
                 config.node(splitPath(path)).set(io.leangen.geantyref.TypeToken.get(String.class), def);
@@ -123,32 +123,32 @@ abstract class AbstractConfig {
         }
     }
 
-    protected static boolean getBoolean(String prefix, String path, boolean def) {
+    protected boolean getBoolean(String prefix, String path, boolean def) {
         set(prefix, path, def);
         return config.node(splitPath(path)).getBoolean(def);
     }
 
-    protected static double getDouble(String prefix, String path, double def) {
+    protected double getDouble(String prefix, String path, double def) {
         set(prefix, path, def);
         return config.node(splitPath(path)).getDouble(def);
     }
 
-    protected static int getInt(String prefix, String path, int def) {
+    protected int getInt(String prefix, String path, int def) {
         set(prefix, path, def);
         return config.node(splitPath(path)).getInt(def);
     }
 
-    protected static String getString(String prefix, String path, String def) {
+    protected String getString(String prefix, String path, String def) {
         setString(path, def);
         return config.node(splitPath(path)).getString(def);
     }
 
-    protected static Long getLong(String prefix, String path, Long def) {
+    protected Long getLong(String prefix, String path, Long def) {
         set(prefix, path, def);
         return config.node(splitPath(path)).getLong(def);
     }
 
-    private static void setStringList(String prefix, String path, List<String> def) {
+    private void setStringList(String prefix, String path, List<String> def) {
         path = prefix + path;
         System.out.println("Setting: " + def);
         if(config.node(splitPath(path)).virtual()) {
@@ -167,7 +167,7 @@ abstract class AbstractConfig {
         saveConfig();
     }
 
-    protected static List<String> getStringList(String prefix, String path, List<String> def) {
+    protected List<String> getStringList(String prefix, String path, List<String> def) {
         try {
             setStringList(prefix, path, def);
             return config.node(splitPath(path)).getList(TypeToken.get(String.class));

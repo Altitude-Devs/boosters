@@ -58,13 +58,6 @@ abstract class AbstractConfig {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        readConfig(clazz, null);
-        try {
-            configLoader.save(config);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     protected void readConfig(Class<?> clazz, Object instance) {

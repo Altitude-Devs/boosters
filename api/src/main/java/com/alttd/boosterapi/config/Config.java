@@ -20,7 +20,7 @@ public final class Config extends AbstractConfig {
 
     public static void reload(Logger logger) {
         config = new Config(logger);
-        config.readConfig(Config.class, null);
+        config.readConfig(Config.class, config);
     }
 
     public static class LOGGING {

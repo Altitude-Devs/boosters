@@ -11,8 +11,8 @@ public final class Config extends AbstractConfig {
 
     Config(Logger logger) {
         super(
-                new File(System.getProperty("user.home") + File.separator
-                        + "share" + File.separator
+                new File(File.separator
+                        + "mnt" + File.separator
                         + "configs" + File.separator
                         + "Boosters"),
                 "config.yml", logger, Config.class);

@@ -27,7 +27,7 @@ public class BoosterFileStorage {
     }
 
     private void init() {
-        File CONFIG_PATH = new File(System.getProperty("user.home") + File.separator + "share" + File.separator + "configs" + File.separator + "Boosters");
+        File CONFIG_PATH = new File(File.separator + "mnt" + File.separator + "configs" + File.separator + "Boosters");
         if (!CONFIG_PATH.exists()) {
             if (!CONFIG_PATH.mkdir())
                 logger.severe("Unable to create json storage directory");

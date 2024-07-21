@@ -1,6 +1,6 @@
 plugins {
     `maven-publish`
-    id("com.github.johnrengelman.shadow")
+    id("io.github.goooler.shadow")
     id("net.minecrell.plugin-yml.bukkit") version "0.5.1"
 }
 

@@ -1,16 +1,14 @@
 plugins {
     `java-library`
     `maven-publish`
-    id("com.github.johnrengelman.shadow") version "7.1.0"
+    id("io.github.goooler.shadow") version "8.1.8"
 }
 
 allprojects {
     group = "com.alttd.boosters"
     version = "1.0.0-BETA-SNAPSHOT"
     description = "Easily manage all boosters on the Altitude Minecraft Server Network."
-}
 
-subprojects {
     apply<JavaLibraryPlugin>()
     apply(plugin = "maven-publish")
 
@@ -19,7 +17,9 @@ subprojects {
             languageVersion.set(JavaLanguageVersion.of(21))
         }
     }
+}
 
+subprojects {
     tasks {
         withType<JavaCompile> {
             options.encoding = Charsets.UTF_8.name()

@@ -8,11 +8,11 @@ dependencies {
     // API
     implementation(project(":boosters-api"))
     // Galaxy
-    compileOnly("com.alttd:Galaxy-API:1.19.2-R0.1-SNAPSHOT")
+    compileOnly("com.alttd:Galaxy-API:1.21-R0.1-SNAPSHOT")
     // MyPet
     compileOnly("de.keyle:mypet:3.12-SNAPSHOT")
     // mcMMO
-    compileOnly("com.gmail.nossr50.mcMMO:mcMMO:2.1.206") {
+    compileOnly("com.gmail.nossr50.mcMMO:mcMMO:2.2.004") {
         exclude("com.sk89q.worldguard")
     }
 

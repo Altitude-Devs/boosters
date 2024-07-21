@@ -26,6 +26,9 @@ public enum BoosterType {
     TAMING("taming", MCMMO),
     UNARMED("unarmed", MCMMO),
     WOODCUTTING("woodcutting", MCMMO),
+    CROSSBOWS("crossbows", MCMMO),
+    MACES("maces", MCMMO),
+    TRIDENTS("tridents", MCMMO),
 
     /**
      * MYPET - Boosts MyPet exp gains
